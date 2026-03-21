@@ -3,7 +3,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/your-org/nusantara-calendar/ci.yml?branch=main&label=CI)](https://github.com/your-org/nusantara-calendar/actions)
 [![crates.io](https://img.shields.io/crates/v/calendar-core.svg)](https://crates.io/crates/calendar-core)
 [![docs.rs](https://docs.rs/calendar-core/badge.svg)](https://docs.rs/calendar-core)
-[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
+[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](#license)
 [![MSRV: 1.75](https://img.shields.io/badge/MSRV-1.75-orange.svg)](https://blog.rust-lang.org/2023/12/28/Rust-1.75.0.html)
 
 A Rust workspace covering every traditional calendar system with a documented algorithmic
@@ -34,6 +34,17 @@ single, algorithmically grounded, source-attributed codebase.**
 | [`toraja`] | Toraja ritual calendar (Rambu Solo', Rambu Tuka') | ✅ | v0.6 |
 | [`minangkabau`] | Minangkabau agricultural + Islamic overlay | ✅ | v0.6 |
 | [`dewasa-engine`] | Cross-calendar auspiciousness correlator | ❌ (std) | v0.7 / v1.0 |
+
+### `hijriyah` execution plan (Option A)
+
+The Hijri crate is being implemented via an independent, license-clean arithmetic path:
+
+- **Why**: `misykat` (GPL-3.0-only) would force copyleft across the workspace. We instead reimplement the tabular Islamic calendar from Dershowitz & Reingold Ch. 6 and Meeus Ch. 9, keeping the crate `MIT OR Apache-2.0`.
+- **Scope**: `HijriDay`, `HijriMonth`, `Pasaran`, `maulid/isra_miraj/idul_fitri/idul_adha/haul` helpers, `tabular_date()` vs `indonesian_government_date()` stub, `CalendarDate` + `CalendarMetadata` impls, full no_std + WASM support.
+- **Structure**: `Cargo.toml`, `DECISION.md`, `SOURCES.md`, and modules `arithmetic`, `types`, `holidays`, `metadata`, plus `tests/anchors.rs` with the four mandated JDN anchors (1 AH, 1043 AH, 1355 AH, 1446 AH).
+- **Verification**: Round-trip property tests (1–1600 AH), Pasaran validation (Jumat Legi cross-check), no_std + wasm32 builds.
+
+See `~/.windsurf/plans/hijriyah-implementation-a99a87.md` and the mirrored TODO/SPEC entries for the authoritative checklist.
 
 † `batak`: `no_std` for tabular feature; `std` required for `astronomical` feature (heliacal observation math).
 
@@ -168,18 +179,16 @@ contexts.
 
 ## License
 
-Licensed under either of:
-
-- Apache License, Version 2.0 ([LICENSE-APACHE](LICENSE-APACHE))
-- MIT License ([LICENSE-MIT](LICENSE-MIT))
-
-at your option.
+Licensed under the [Apache License, Version 2.0](LICENSE).
 
 > **Note on `chinese-nusantara`**: depends on `nongli` (MIT). License compatible.
 >
 > **Note on `hijriyah`**: does **not** depend on `misykat` (GPL-3.0). Hijri date
 > arithmetic is reimplemented independently from Dershowitz-Reingold Ch. 6 and Meeus Ch. 9,
-> keeping this crate MIT/Apache-2.0. See `hijriyah/SOURCES.md` for full attribution.
+> keeping this crate MIT/Apache-2.0. `hijriyah/SOURCES.md` carries the citations, and the
+> full Option A execution plan (independent tabular arithmetic, Indonesian holiday helpers,
+> pasaran computation, no_std + WASM support, government-date stub) is documented in
+> [`SPEC.md`](SPEC.md#hijriyah) / [`ARCHITECTURE.md`](ARCHITECTURE.md#12-dependency-decisions--licenses).
 
 ---
 

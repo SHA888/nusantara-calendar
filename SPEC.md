@@ -256,53 +256,45 @@ impl WinduYear {
 
 ### `hijriyah`
 
-> **[Fix 2 — LICENSING BLOCKER]**
->
-> The `misykat` crate (v4.1.2, `github.com/azzamsa/misykat`) is licensed under **GPL-3.0**.
-> GPL-3.0 is a strong copyleft license. Incorporating `misykat` as a library dependency means:
->
-> - The `hijriyah` crate itself must be distributed under GPL-3.0 or a compatible license.
-> - Any crate that depends on `hijriyah` — including `dewasa-engine` and any downstream consumer
->   of `nusantara-calendar` — must also comply with GPL-3.0 terms.
-> - This is **incompatible** with publishing `hijriyah` under MIT/Apache-2.0 on crates.io as an
->   independently permissive crate.
->
-> **Resolution — choose one before writing any `hijriyah` code:**
->
-> **Option A (preferred): Reimplement Hijri date math independently.**
-> The Hijri ↔ Gregorian conversion algorithm is standard arithmetic documented in
-> Dershowitz-Reingold Ch. 6 "The Islamic Calendar" and Meeus Ch. 9. The algorithm itself
-> is not copyrightable. Only misykat's specific Rust code is GPL-3.0. This approach keeps
-> `hijriyah` MIT/Apache-2.0 and avoids the entire dependency.
->
-> **Option B: Contact the maintainer.**
-> Request dual-licensing (MIT/Apache-2.0 || GPL-3.0) from `azzamsa`. If granted, the wrapper
-> approach is viable. Until written confirmation is received, treat Option A as the default.
->
-> **Option C: Accept GPL-3.0 for the entire `nusantara-calendar` workspace.**
-> This is viable if the project is open-source GPL and downstream use is not a constraint.
-> Must be an explicit, documented decision — not an accidental outcome of dependency resolution.
->
-> The spec proceeds below assuming **Option A**. If Option B or C is chosen, annotate the
-> `hijriyah/Cargo.toml` with a `# LICENSE: GPL-3.0 (via misykat dependency)` comment and
-> propagate the license declaration through all dependent crates.
+> **[Fix 2 — LICENSING BLOCKER]** — Full execution plan: `~/.windsurf/plans/hijriyah-implementation-a99a87.md`.
 
-#### Implementation (Option A)
+**Problem.** `misykat` v4.1.2 (GPL-3.0-only) cannot be a dependency. Pulling it in would force
+GPL-3.0-only on `hijriyah`, `dewasa-engine`, and downstream consumers, contradicting the workspace's
+`MIT OR Apache-2.0` license.
 
-Implement Hijri ↔ Gregorian conversion using the tabular Islamic calendar algorithm from
-Dershowitz-Reingold Ch. 6. The tabular algorithm is deterministic and `no_std`-compatible.
+**Decision (Option A).** Reimplement Hijri arithmetic independently from primary sources
+(Dershowitz & Reingold, *Calendrical Calculations* 4th ed. Ch. 6; Meeus, *Astronomical Algorithms* 2nd ed. Ch. 9).
+Record this in `hijriyah/DECISION.md` and cite both sources in `SOURCES.md`. Do **not** read misykat code.
 
-Add Indonesian-specific extensions:
-- **Weton Islam**: intersection with Javanese Pasaran (used in Javanese-Islamic context)
-- **Haul**: annual death anniversary calculation
-- **Maulid**: Prophet's birthday (12 Rabi' al-Awwal), exact Gregorian mapping per year
-- **Indonesian national Islamic holidays**: Isra Mi'raj, Idul Fitri, Idul Adha — per
-  Kemenag (Ministry of Religious Affairs) calendar rules (hilal observation + hisab)
-- Expose both: `tabular_date()` and `indonesian_government_date()` with a note on the
-  distinction (Indonesian government uses rukyat/hisab combination; tabular is algorithmic)
+#### Design requirements
 
-Prayer-time calculation is **out of scope** for this crate (that is what `misykat` and
-`praytime-rs` are for). This crate covers calendar date arithmetic only.
+- Crate metadata: `name = "hijriyah"`, version `0.2.0`, `edition = 2021`, `rust-version = 1.75`, `license = "MIT OR Apache-2.0"`.
+- Feature flags: `default = []`, `std`, `serde`, `wasm`. Must compile `no_std + alloc` when `std` is disabled.
+- Public API exposes `HijriDay`, `HijriMonth`, `Pasaran`, tabular vs government date distinction, Indonesian holidays, and haul computation.
+- Supported range: at least 1–1600 AH. Document behavior outside range (`CalendarError::OutOfRange`).
+- Documentation style: every public item gets the Islamic context docstring (Arabic + Indonesian name, epoch, sources).
+
+#### Implementation scope
+
+1. **Skeleton & gating**: `crates/hijriyah/` with `Cargo.toml`, `DECISION.md`, `SOURCES.md`, `src/lib.rs`, `arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`, `tests/anchors.rs`.
+   - `#![cfg_attr(not(feature = "std"), no_std)]`, `extern crate alloc`, `pub use` key types.
+2. **Core arithmetic**: Implement `hijri_to_jdn` / `jdn_to_hijri` using D-R Eq. 6.2–6.3 (Thursday epoch, JDN 1948439).
+   - Leap-year cycle: years {2,5,7,10,13,16,18,21,24,26,29} per 30-year block. Expose `HijriDay::is_leap_year`.
+3. **Types**: Build `HijriDay` struct with year/month/day, `HijriMonth` enum (Arabic + Indonesian names), `Pasaran` enum (Kliwon–Wage) using `(jdn + 2) % 5` formula.
+4. **Indonesian extensions**: Provide `maulid_jdn`, `isra_miraj_jdn`, `idul_fitri_jdn`, `idul_adha_jdn`, `haul_jdn` helpers (tabular arithmetic). No prayer-time logic.
+5. **Government date stub**: `indonesian_government_date()` returns `stub!("indonesian_government_date: requires Kemenag rukyat/hisab data; tabular approximation only. See https://sihat.kemenag.go.id")`.
+6. **Traits**: Implement `CalendarDate`/`CalendarMetadata` using `calendar-core`. Add metadata for epoch JDN, sources list, `reference_sources()` exposure.
+7. **Docs**: crate-level `//!` clarifying independent reimplementation, no misykat dependency, Apache-2.0 compatibility.
+
+#### Testing matrix
+
+- Anchor conversions: verify `hijri_to_jdn(1,1,1)=1948439`, `(...1043,1,1)=2317690`, `(...1355,1,1)=2428252`, `(...1446,1,1)=2460494`.
+- Holiday spot checks: `idul_fitri_jdn(y) == hijri_to_jdn(y, 10, 1)`, `maulid_jdn(1446) == hijri_to_jdn(1446, 3, 12)`.
+- Pasaran: `HijriDay::from_jdn(2317690)?.pasaran == Pasaran::Legi` (Jumat Legi).
+- Property test: 1000 random JDNs within 1–1600 AH round-trip through `jdn_to_hijri`/`hijri_to_jdn`.
+- Build-verification: `cargo build/test -p hijriyah --no-default-features` and `--target wasm32-unknown-unknown --no-default-features`.
+
+Prayer-time computation, rukyat modeling, and any dependency on `misykat`/`praytime-rs` remain out of scope.
 
 ---
 

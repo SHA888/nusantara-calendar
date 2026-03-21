@@ -395,17 +395,17 @@ not drag an otherwise `HighlyAuspicious` day down to `Unknown`.
 
 | Dependency | Version | License | Used by | Decision |
 |---|---|---|---|---|
-| `thiserror` | latest | MIT/Apache-2.0 | `calendar-core` | Standard error derive |
+| `thiserror` | 2.0.18 | MIT OR Apache-2.0 | `calendar-core` | Standard error derive |
 | `nongli` | 0.4.1 | MIT | `chinese-nusantara` | Only Rust Chinese lunisolar crate with JDN-compatible API |
-| `chrono` | latest | MIT/Apache-2.0 | `chinese-nusantara` (via nongli) | Transitive; `std` feature only |
-| `serde` | latest | MIT/Apache-2.0 | all (optional `serde` feature) | De-facto serialization standard |
-| `wasm-bindgen` | latest | MIT/Apache-2.0 | all (optional `wasm` feature) | Required for WASM JS interop |
-| `libm` | 0.2 | MIT | `batak`, `sasak`, `bugis`, `minangkabau` (optional `astronomical`) | `no_std`-compatible float math |
+| `chrono` | 0.4.44 | MIT OR Apache-2.0 | `chinese-nusantara` (via nongli) | Transitive; `std` feature only |
+| `serde` | 1.0.228 | MIT OR Apache-2.0 | all (optional `serde` feature) | De-facto serialization standard |
+| `wasm-bindgen` | 0.2.114 | MIT OR Apache-2.0 | all (optional `wasm` feature) | Required for WASM JS interop |
+| `libm` | 0.2.16 | MIT | `batak`, `sasak`, `bugis`, `minangkabau` (optional `astronomical`) | `no_std`-compatible float math |
 
 **Explicitly excluded:**
 
-- `misykat` (GPL-3.0) — would force copyleft on entire workspace. Hijri arithmetic
-  reimplemented independently from Dershowitz-Reingold Ch. 6 and Meeus Ch. 9.
+- `misykat` (GPL-3.0-only) — copyleft; would force GPL-3.0-only terms on all dependents. Hijri arithmetic
+  reimplemented independently from Dershowitz-Reingold Ch. 6 and Meeus Ch. 9 to keep the workspace permissive.
 - `tanggalan` (bect/tanggalan) — does not exist on crates.io as of March 2026.
 - Any crate providing astrology, prayer times, or timezone conversion — out of scope.
 

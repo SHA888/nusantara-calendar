@@ -170,38 +170,32 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ### 2.3 `hijriyah`
 
+> Detailed execution plan tracked at `~/.windsurf/plans/hijriyah-implementation-a99a87.md`.
+
 #### Design
-- [ ] `[arch]` **Confirm GPL-3.0 resolution before writing any code.**
-      Default: Option A (independent reimplementation). Record decision in `hijriyah/DECISION.md`.
-- [ ] `[arch]` Select tabular Hijri algorithm variant: Thursday epoch (civil calendar) from D-R Ch. 6
-- [ ] `[arch]` Define `tabular_date()` vs `indonesian_government_date()` API surface
-- [ ] `[arch]` Specify supported Hijri year range (minimum: 1 AH – 1600 AH)
+- [ ] `[arch]` Confirm GPL-3.0-only exclusion (misykat) and record Option A decision in `hijriyah/DECISION.md`.
+- [ ] `[arch]` Define crate structure (`Cargo.toml`, `src/`, `tests/`, `DECISION.md`, `SOURCES.md`).
+- [ ] `[arch]` Specify arithmetic sources (Dershowitz-Reingold Ch. 6, Meeus Ch. 9) and cite in rustdoc.
+- [ ] `[arch]` Declare `tabular_date()` vs `indonesian_government_date()` behavior and supported Hijri range (≥1–1600 AH).
 
 #### Implementation
-- [ ] `[impl]` Create `crates/hijriyah/` skeleton; add `hijriyah/DECISION.md` documenting license choice
-- [ ] `[impl]` Implement `hijri_to_jdn(y: i32, m: u8, d: u8) -> i64` (D-R Ch. 6 tabular)
-- [ ] `[impl]` Implement `jdn_to_hijri(jdn: i64) -> (i32, u8, u8)`
-- [ ] `[impl]` Implement `HijriDay` struct with year, month, day
-- [ ] `[impl]` Implement month names in Arabic + Indonesian transliterations (Muharram / Sura etc.)
-- [ ] `[impl]` Implement `tabular_date()` → deterministic, `no_std`
-- [ ] `[impl]` Stub `indonesian_government_date()` → `stub!()` pending Kemenag hisab algorithm
-      with citation to current Kemenag methodology documentation
-- [ ] `[impl]` Implement **Weton Islam**: Pasaran day from JDN (shared formula with `jawa`)
-      Note: re-implement, do not import `jawa` (cross-crate dependency forbidden)
-- [ ] `[impl]` Implement **Haul** calculation: anniversary of death in Hijri calendar
-- [ ] `[impl]` Implement **Maulid**: 12 Rabi' al-Awwal → Gregorian for any given Hijri year
-- [ ] `[impl]` Implement **Isra Mi'raj**: 27 Rajab → Gregorian
-- [ ] `[impl]` Implement **Idul Fitri**: 1 Syawal → Gregorian (tabular only)
-- [ ] `[impl]` Implement **Idul Adha**: 10 Dzulhijjah → Gregorian (tabular only)
-- [ ] `[impl]` Implement `CalendarDate`, `CalendarMetadata` for `HijriDay`
-- [ ] `[impl]` Gate `no_std` correctly; add `SOURCES.md` with full algorithm attribution
+- [ ] `[impl]` Create crate skeleton (`Cargo.toml`, `src/lib.rs`, `arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`, `tests/anchors.rs`).
+- [ ] `[impl]` Add `#![cfg_attr(not(feature = "std"), no_std)]` + `extern crate alloc`; wire features (`std`, `serde`, `wasm`).
+- [ ] `[impl]` Implement `hijri_to_jdn` and `jdn_to_hijri` per D-R Eq. 6.2–6.3 (tabular, Thursday epoch, JDN 1948439 start).
+- [ ] `[impl]` Implement leap-year logic (years 2,5,7,10,13,16,18,21,24,26,29 in each 30-year cycle) and expose `HijriDay::is_leap_year`.
+- [ ] `[impl]` Build `HijriDay` struct with month metadata (Arabic + Indonesian names), `day_of_year`, `pasaran` field.
+- [ ] `[impl]` Implement Pasaran calculation `(jdn + 2) % 5` as standalone helper (no dependency on `jawa`).
+- [ ] `[impl]` Implement holiday helpers: `maulid_jdn`, `isra_miraj_jdn`, `idul_fitri_jdn`, `idul_adha_jdn`, `haul_jdn`.
+- [ ] `[impl]` Provide `tabular_date()` and stub `indonesian_government_date()` with `stub!()` message referencing Kemenag data need.
+- [ ] `[impl]` Document algorithm choice and record exclusion rationale in `DECISION.md`; cite references in `SOURCES.md`.
+- [ ] `[impl]` Implement `CalendarDate` + `CalendarMetadata` traits for `HijriDay` (no_std ready).
 
 #### Testing
-- [ ] `[test]` Known anchor: 1 Muharram 1043 AH == 1633-07-08 Gregorian
-- [ ] `[test]` Known anchor: 1 Muharram 1355 AH == 1936-03-24 Gregorian (Kurup start)
-- [ ] `[test]` Maulid 1446 AH: verify 12 Rabi' al-Awwal maps to 2024-09-15 Gregorian
-- [ ] `[test]` Round-trip: 500 random JDNs within 1 AH – 1600 AH
-- [ ] `[test]` `--no-default-features` + WASM build check
+- [ ] `[test]` Anchor JDNs: 1 Muharram 1 AH (1948439), 1043 AH (2317690), 1355 AH (2428252), 1446 AH (2460494).
+- [ ] `[test]` Holiday equality: ensure `idul_fitri_jdn(y) == hijri_to_jdn(y, 10, 1)` etc.
+- [ ] `[test]` Pasaran check: `HijriDay::from_jdn(2317690)?.pasaran == Pasaran::Legi` (Jumat Legi).
+- [ ] `[test]` Round-trip property: 1000 random JDNs within 1–1600 AH.
+- [ ] `[test]` no_std + WASM builds: `cargo build/test -p hijriyah --no-default-features` and `--target wasm32-unknown-unknown`.
 
 ---
 
