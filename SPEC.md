@@ -467,7 +467,7 @@ pub struct CrossCalendarVerdict {
 | Crate | `no_std + alloc` | `std` required | Reason |
 |---|---|---|---|
 | `calendar-core` | ✅ required | — | trait definitions, JDN math |
-| `balinese-calendar` | ✅ required | — | pure arithmetic |
+| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | ✅ required | — | pure arithmetic (crate: https://crates.io/crates/balinese-calendar) |
 | `jawa` | ✅ required | — | pure arithmetic |
 | `hijriyah` | ✅ (Option A) | if Option B/C | depends on license choice |
 | `chinese-nusantara` | ❌ | ✅ | `nongli` → `chrono` requires `std` |
@@ -492,7 +492,7 @@ Additional constraints applying to all crates:
 ## Build Order (strict — each depends on previous)
 
 1. `calendar-core` — traits, JDN math, error types, `stub!()` macro
-2. `balinese-calendar` (expansion from Prompt 1) + `jawa` + `hijriyah` + `chinese-nusantara`
+2. [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) (expansion from Prompt 1; published at https://crates.io/crates/balinese-calendar) + `jawa` + `hijriyah` + `chinese-nusantara`
 3. `batak` (most academically documented after Bali/Jawa)
 4. `sunda`, `tengger` (algorithmically close to Jawa/Bali)
 5. `bugis`, `sasak`, `dayak` (observation-dependent, partial stubs acceptable)

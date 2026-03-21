@@ -21,7 +21,7 @@ single, algorithmically grounded, source-attributed codebase.**
 | Crate | Description | `no_std` | Status |
 |---|---|---|---|
 | [`calendar-core`] | Shared traits, JDN pivot, error types, `stub!()` macro | ✅ | v0.1 |
-| [`balinese-calendar`] | Balinese Saka-Wuku calendar (Pawukon, Wewaran, Sasih) | ✅ | v0.2 |
+| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | Balinese Saka-Wuku calendar (Pawukon, Wewaran, Sasih) | ✅ | v0.2 |
 | [`jawa`] | Javanese Wetonan, Pawukon, Windu, Pranata Masa | ✅ | v0.2 |
 | [`hijriyah`] | Islamic lunar calendar + Indonesian Kemenag extensions | ✅ | v0.2 |
 | [`chinese-nusantara`] | Chinese lunisolar calendar, Peranakan context | ❌ (std) | v0.2 |
@@ -72,7 +72,7 @@ Add the workspace crates you need to your `Cargo.toml`:
 ```toml
 [dependencies]
 calendar-core      = "0.1"
-balinese-calendar  = "0.2"
+balinese-calendar  = "0.2" # https://crates.io/crates/balinese-calendar (source: https://github.com/SHA888/balinese-calendar)
 jawa               = "0.2"
 hijriyah           = "0.2"
 ```
@@ -154,7 +154,7 @@ pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690; // 1633-07-08 Gregorian
 
 ## `no_std` and WASM
 
-Core computation crates (`calendar-core`, `jawa`, `balinese-calendar`, `hijriyah` Option A,
+Core computation crates (`calendar-core`, `jawa`, [`balinese-calendar`](https://github.com/SHA888/balinese-calendar), `hijriyah` Option A,
 and most ethnic crates) are `no_std + alloc` compatible. They compile to WASM32:
 
 ```sh
@@ -209,7 +209,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [ARCHITECTURE.md](ARCHITECTURE.md).
 - H. Danudji, *Penanggalan Jawa 120 Tahun Kurup Asapon*, Dahara Prize, 2006 — Kurup table
 - "A Lunar-Star Calendar: Inquiry to the Traditional Batak Calendar",
   preprints.org/manuscript/202404.0235 (2024) — Batak Porhalaan
-- `balinese-calendar` crate (v0.1.1) — first native Rust Balinese Saka calendar implementation
+- [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) crate ([crates.io](https://crates.io/crates/balinese-calendar), v0.1.1) — first native Rust Balinese Saka calendar implementation
 
 ---
 

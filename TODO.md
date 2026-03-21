@@ -105,7 +105,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ---
 
-### 2.1 `balinese-calendar`
+### 2.1 [`balinese-calendar`](https://github.com/SHA888/balinese-calendar)
 
 #### Design
 - [ ] `[arch]` Audit existing `balinese-calendar` v0.1.1 crate (authored by Kresna)
@@ -226,7 +226,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Shio: verify 2026 is year of the Horse (Kuda)
 - [ ] `[test]` Round-trip: 200 dates (nongli range: 1900–2100)
 
-### v0.2.0 Release
+### v0.2.0 Release (balinese-calendar published at [crates.io](https://crates.io/crates/balinese-calendar))
 - [ ] `[rel]` Integration test: `dewasa-engine` smoke test with all 4 crates (pre-release build)
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.2.0]` section for each crate
 - [ ] `[rel]` Dry-run publish all 4 crates

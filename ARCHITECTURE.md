@@ -148,7 +148,7 @@ rules that can be algorithmically derived. Do **not** implement by guessing.
 | Crate | Policy | Justification |
 |---|---|---|
 | `calendar-core` | `no_std + alloc` | All types are plain data; no OS interaction |
-| `balinese-calendar` | `no_std + alloc` | Pure modular arithmetic on `const` tables |
+| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | `no_std + alloc` | pure arithmetic (crate: https://crates.io/crates/balinese-calendar) |
 | `jawa` | `no_std + alloc` | Pure modular arithmetic on `const` tables |
 | `hijriyah` (Option A) | `no_std + alloc` | Tabular algorithm from D-R Ch. 6; no float |
 | `chinese-nusantara` | `std` required | `nongli` → `chrono` → `std` |
