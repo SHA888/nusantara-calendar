@@ -1,0 +1,57 @@
+# Dependabot configuration for nusantara-calendar
+# Automatically updates Cargo.toml dependencies
+
+version: 2
+updates:
+
+  # Update Rust dependencies
+  - package-ecosystem: "cargo"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "SHA888"
+    assignees:
+      - "SHA888"
+    commit-message:
+      prefix: "deps"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "rust"
+    allow:
+      # Allow updates for these dependency types
+      - dependency-type: "direct"
+      - dependency-type: "indirect"
+    ignore:
+      # Ignore specific dependencies that should be updated manually
+      - dependency-name: "balinese-calendar"
+        reason: "External dependency with specific version requirements"
+      - dependency-name: "nongli"
+        reason: "Chinese calendar dependency requires license audit before updates"
+    rebase-strategy: "auto"
+
+  # Update GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "UTC"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "SHA888"
+    assignees:
+      - "SHA888"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+    labels:
+      - "ci"
+      - "github-actions"
+    rebase-strategy: "auto"

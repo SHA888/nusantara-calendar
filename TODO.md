@@ -39,14 +39,14 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [x] `[impl]` Add `[workspace.metadata.release]` for `cargo-release` config
 
 ### 0.3 CI Pipeline (GitHub Actions)
-- [ ] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.80
-- [ ] `[ci]` Add WASM compilation check job:
+- [x] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.80
+- [x] `[ci]` Add WASM compilation check job:
   `cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features`
-- [ ] `[ci]` Add `cargo test --no-default-features` job (verifies `no_std` compilability)
-- [ ] `[ci]` Add `cargo deny check` for license auditing (catches GPL transitive deps)
-- [ ] `[ci]` Add `deny.toml` with `deny = ["GPL-3.0"]` for workspace-level license policy
-- [ ] `[ci]` Add `cargo doc --no-deps` build check (no broken intra-doc links)
-- [ ] `[ci]` Configure Dependabot for `Cargo.toml` dependency updates
+- [x] `[ci]` Add `cargo test --no-default-features` job (verifies `no_std` compilability)
+- [x] `[ci]` Add `cargo deny check` for license auditing (catches GPL transitive deps)
+- [x] `[ci]` Add `deny.toml` with `deny = ["GPL-3.0"]` for workspace-level license policy
+- [x] `[ci]` Add `cargo doc --no-deps` build check (no broken intra-doc links)
+- [x] `[ci]` Configure Dependabot for `Cargo.toml` dependency updates
 
 ---
 
