@@ -17,7 +17,6 @@ doc = "doc --no-deps"
 doc-open = "doc --open --no-deps"
 
 # Formatting and linting
-fmt = "fmt --all"
 clippy = "clippy -- -D warnings"
 
 # Workspace management

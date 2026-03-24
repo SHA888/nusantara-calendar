@@ -30,9 +30,7 @@ updates:
     ignore:
       # Ignore specific dependencies that should be updated manually
       - dependency-name: "balinese-calendar"
-        reason: "External dependency with specific version requirements"
       - dependency-name: "nongli"
-        reason: "Chinese calendar dependency requires license audit before updates"
     rebase-strategy: "auto"
 
   # Update GitHub Actions
