@@ -29,14 +29,14 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [x] `[doc]` Add `README.md` at workspace root
 
 ### 0.2 Workspace Cargo.toml
-- [ ] `[impl]` Create `Cargo.toml` workspace root listing all member crates
-- [ ] `[impl]` Add `[workspace.dependencies]` table with pinned shared deps
+- [x] `[impl]` Create `Cargo.toml` workspace root listing all member crates
+- [x] `[impl]` Add `[workspace.dependencies]` table with pinned shared deps
   - `thiserror = "2"` (latest stable)
   - `serde = { version = "1", features = ["derive"], optional = true }`
   - `wasm-bindgen = { version = "0.2", optional = true }`
   - `libm = { version = "0.2", optional = true }`
-- [ ] `[impl]` Add `[profile.release]` with `lto = true`, `opt-level = "s"` for WASM size
-- [ ] `[impl]` Add `[workspace.metadata.release]` for `cargo-release` config
+- [x] `[impl]` Add `[profile.release]` with `lto = true`, `opt-level = "s"` for WASM size
+- [x] `[impl]` Add `[workspace.metadata.release]` for `cargo-release` config
 
 ### 0.3 CI Pipeline (GitHub Actions)
 - [ ] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.80
