@@ -1,0 +1,35 @@
+[package]
+name = "calendar-core"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT OR Apache-2.0"
+description = "Core traits and utilities for nusantara-calendar workspace"
+repository = "https://github.com/SHA888/nusantara-calendar"
+authors = ["Nusantara Calendar Contributors"]
+
+[dependencies]
+# Use workspace dependencies
+thiserror = { workspace = true }
+
+[features]
+default = ["std"]
+std = []
+serde = ["dep:serde"]
+wasm = []
+
+[dependencies.serde]
+workspace = true
+optional = true
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = { workspace = true, optional = true }
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"

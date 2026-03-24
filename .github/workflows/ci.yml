@@ -17,12 +17,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust stable
       uses: dtolnay/rust-toolchain@stable
       with:
         components: rustfmt, clippy
-        
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -30,7 +30,7 @@ jobs:
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-
-          
+
     - name: Cache cargo index
       uses: actions/cache@v4
       with:
@@ -38,7 +38,7 @@ jobs:
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-index-
-          
+
     - name: Cache cargo build
       uses: actions/cache@v4
       with:
@@ -49,13 +49,13 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --all -- --check
-      
+
     - name: Clippy
       run: cargo clippy --workspace --all-targets -- -D warnings
-      
+
     - name: Build
       run: cargo build --verbose
-      
+
     - name: Run tests
       run: cargo test --verbose
 
@@ -65,12 +65,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust MSRV
       uses: dtolnay/rust-toolchain@1.80.0
       with:
         components: rustfmt
-        
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -78,7 +78,7 @@ jobs:
         key: ${{ runner.os }}-cargo-registry-msrv-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-msrv-
-          
+
     - name: Cache cargo index
       uses: actions/cache@v4
       with:
@@ -86,7 +86,7 @@ jobs:
         key: ${{ runner.os }}-cargo-index-msrv-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-index-msrv-
-          
+
     - name: Cache cargo build
       uses: actions/cache@v4
       with:
@@ -97,10 +97,10 @@ jobs:
 
     - name: Check formatting
       run: cargo fmt --all -- --check
-      
+
     - name: Build
       run: cargo build --verbose
-      
+
     - name: Run tests
       run: cargo test --verbose
 
@@ -110,15 +110,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust stable
       uses: dtolnay/rust-toolchain@stable
-      
+
     - name: Install wasm-pack
       uses: jetli/wasm-pack-action@v1
       with:
         version: latest
-        
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -126,7 +126,7 @@ jobs:
         key: ${{ runner.os }}-cargo-registry-wasm-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-wasm-
-          
+
     - name: Cache cargo index
       uses: actions/cache@v4
       with:
@@ -137,10 +137,10 @@ jobs:
 
     - name: Add WASM target
       run: rustup target add wasm32-unknown-unknown
-      
+
     - name: Build calendar-core for WASM
       run: cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features
-      
+
     - name: Test no_std compilation
       run: cargo test --no-default-features
 
@@ -150,10 +150,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust stable
       uses: dtolnay/rust-toolchain@stable
-      
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -161,7 +161,7 @@ jobs:
         key: ${{ runner.os }}-cargo-registry-docs-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-docs-
-          
+
     - name: Cache cargo index
       uses: actions/cache@v4
       with:
@@ -169,7 +169,7 @@ jobs:
         key: ${{ runner.os }}-cargo-index-docs-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-index-docs-
-          
+
     - name: Cache cargo build
       uses: actions/cache@v4
       with:
@@ -180,7 +180,7 @@ jobs:
 
     - name: Build documentation
       run: cargo doc --no-deps --document-private-items
-      
+
     - name: Check intra-doc links
       run: cargo doc --no-deps --document-private-items --workspace
 
@@ -190,13 +190,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Install Rust stable
       uses: dtolnay/rust-toolchain@stable
-      
+
     - name: Install cargo-deny
       run: cargo install cargo-deny --locked
-      
+
     - name: Cache cargo registry
       uses: actions/cache@v4
       with:
@@ -204,7 +204,7 @@ jobs:
         key: ${{ runner.os }}-cargo-registry-deny-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-registry-deny-
-          
+
     - name: Cache cargo index
       uses: actions/cache@v4
       with:

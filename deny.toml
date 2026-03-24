@@ -2,8 +2,13 @@
 # This configuration prevents problematic dependencies from being added
 
 [graph]
-# Don't include dev-dependencies in the license graph
-dev-dependencies = false
+targets = [
+    { triple = "x86_64-unknown-linux-gnu" },
+    { triple = "x86_64-unknown-linux-musl" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "x86_64-pc-windows-msvc" },
+    { triple = "wasm32-unknown-unknown" },
+]
 
 [licenses]
 # List of explicitly allowed licenses
@@ -14,21 +19,8 @@ allow = [
     "BSD-3-Clause",
     "ISC",
     "Unicode-DFS-2016",
+    "Unicode-3.0",
     "CC0-1.0",
-]
-
-# List of explicitly denied licenses
-deny = [
-    # GPL licenses are incompatible with our MIT/Apache-2.0 dual license
-    "GPL-2.0",
-    "GPL-3.0",
-    "AGPL-1.0",
-    "AGPL-3.0",
-]
-
-# Allow exceptions for specific crates
-exceptions = [
-    # Allow exceptions if needed (e.g., for well-known libraries with compatible licenses)
 ]
 
 # Confidence threshold for license detection (0.0-1.0)
@@ -41,30 +33,16 @@ wildcards = "allow"
 highlight = "all"
 workspace-default-features = "allow"
 external-default-features = "allow"
-allow = []
-deny = [
-    # Deny specific problematic crates if needed
-    # { name = "problematic-crate", version = "*" },
-]
 
 [sources]
 # Only allow dependencies from known sources
-allow = [
-    "https://github.com",
-    "https://gitlab.com",
-    "https://crates.io",
-]
+unknown-registry = "deny"
+unknown-git = "deny"
 
-deny = [
-    # Deny unknown git sources
-    { git = "https://private.example.com" },
-]
-
-[ advisories ]
+[advisories]
 # Vulnerability detection
-vulnerability = "deny"
-unmaintained = "warn"
-unsound = "deny"
+unmaintained = "workspace"
+unsound = "workspace"
 ignore = [
     # Add specific advisories to ignore if necessary
     # { id = "RUSTSEC-2023-0001", reason = "False positive" },

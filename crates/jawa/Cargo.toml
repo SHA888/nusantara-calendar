@@ -1,0 +1,23 @@
+[package]
+name = "jawa"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT OR Apache-2.0"
+description = "Javanese calendar implementation for nusantara-calendar"
+repository = "https://github.com/SHA888/nusantara-calendar"
+authors = ["Nusantara Calendar Contributors"]
+
+[dependencies]
+calendar-core = { path = "../calendar-core" }
+thiserror = { workspace = true }
+
+[features]
+default = ["std"]
+std = ["calendar-core/std"]
+serde = ["calendar-core/serde", "dep:serde"]
+wasm = ["calendar-core/wasm"]
+
+[dependencies.serde]
+workspace = true
+optional = true

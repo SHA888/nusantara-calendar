@@ -2,10 +2,10 @@
 members = [
     # Core traits and utilities
     "crates/calendar-core",
-    
+
     # Layer 1: Pure arithmetic calendars (no_std + alloc)
     "crates/jawa",
-    "crates/hijriyah", 
+    "crates/hijriyah",
     "crates/batak",
     "crates/sunda",
     "crates/tengger",
@@ -14,13 +14,13 @@ members = [
     "crates/dayak",
     "crates/toraja",
     "crates/minangkabau",
-    
+
     # Layer 2: Calendars with std dependencies
     "crates/chinese-nusantara",
-    
+
     # Layer 3: Aggregation engines
     "crates/dewasa-engine",
-    
+
     # External dependency (already published)
     # "crates/balinese-calendar", # via crates.io, not in workspace
 ]
@@ -39,9 +39,9 @@ authors = ["Nusantara Calendar Contributors"]
 [workspace.dependencies]
 # Core dependencies
 thiserror = "2"
-serde = { version = "1", features = ["derive"], optional = true }
-wasm-bindgen = { version = "0.2", optional = true }
-libm = { version = "0.2", optional = true }
+serde = { version = "1", features = ["derive"] }
+wasm-bindgen = "0.2"
+libm = "0.2"
 
 # External calendar dependencies
 balinese-calendar = "0.2"  # Published on crates.io
