@@ -44,3 +44,14 @@ Thumbs.db
 
 # Misc
 *.tgz
+
+# Rust
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Rust IDE
+.rustup/
+.cargo/registry
+.cargo/git
