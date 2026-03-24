@@ -268,7 +268,7 @@ Record this in `hijriyah/DECISION.md` and cite both sources in `SOURCES.md`. Do 
 
 #### Design requirements
 
-- Crate metadata: `name = "hijriyah"`, version `0.2.0`, `edition = 2021`, `rust-version = 1.75`, `license = "MIT OR Apache-2.0"`.
+- Crate metadata: `name = "hijriyah"`, version `0.2.0`, `edition = 2021`, `rust-version = 1.80`, `license = "MIT OR Apache-2.0"`.
 - Feature flags: `default = []`, `std`, `serde`, `wasm`. Must compile `no_std + alloc` when `std` is disabled.
 - Public API exposes `HijriDay`, `HijriMonth`, `Pasaran`, tabular vs government date distinction, Indonesian holidays, and haul computation.
 - Supported range: at least 1–1600 AH. Document behavior outside range (`CalendarError::OutOfRange`).
@@ -476,7 +476,7 @@ pub struct CrossCalendarVerdict {
 | `dewasa-engine` | ❌ | ✅ | `HashMap` aggregation |
 
 Additional constraints applying to all crates:
-- Rust edition 2021, MSRV 1.75+
+- Rust edition 2021, MSRV 1.80+
 - All static lookup tables as `const` — no runtime heap allocation for data
 - WASM32 target must compile (verified via `cargo build --target wasm32-unknown-unknown`)
 - Each crate independently publishable to crates.io

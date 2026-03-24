@@ -40,7 +40,7 @@ Every contribution must be sourced, reproducible, and license-clean.
 
 ## Coding Standards
 
-- Rust 2021 edition, MSRV 1.75.
+- Rust 2021 edition, MSRV 1.80.
 - Use `calendar-core` traits (`CalendarDate`, `CalendarMetadata`) for all date structs.
 - Keep modules focused: arithmetic, types, holidays, metadata, tests.
 - Avoid introducing new dependencies without documenting their licenses in `ARCHITECTURE.md`.

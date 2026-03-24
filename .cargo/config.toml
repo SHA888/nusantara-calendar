@@ -1,0 +1,26 @@
+[alias]
+# Workspace commands
+b = "build"
+c = "check"
+t = "test"
+r = "run"
+br = "build --release"
+cr = "check --release"
+tr = "test --release"
+
+# Development commands
+dev = "run --bin nusantara-calendar"
+watch = "run --bin nusantara-calendar --"
+
+# Documentation
+doc = "doc --no-deps"
+doc-open = "doc --open --no-deps"
+
+# Formatting and linting
+fmt = "fmt --all"
+clippy = "clippy -- -D warnings"
+
+# Workspace management
+ws-tree = "tree --workspace --all"
+ws-list = "list --workspace"
+ws-metadata = "metadata --workspace --format-version 1"

@@ -4,7 +4,7 @@
 [![crates.io](https://img.shields.io/crates/v/calendar-core.svg)](https://crates.io/crates/calendar-core)
 [![docs.rs](https://docs.rs/calendar-core/badge.svg)](https://docs.rs/calendar-core)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](#license)
-[![MSRV: 1.75](https://img.shields.io/badge/MSRV-1.75-orange.svg)](https://blog.rust-lang.org/2023/12/28/Rust-1.75.0.html)
+[![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)](https://blog.rust-lang.org/2024/07/25/Rust-1.80.0.html)
 
 A Rust workspace covering every traditional calendar system with a documented algorithmic
 basis across the Indonesian archipelago — from Sabang (Aceh) to Merauke (Papua) — plus the

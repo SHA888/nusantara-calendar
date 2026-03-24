@@ -18,15 +18,15 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > No version tag. Prerequisite for all subsequent milestones.
 
 ### 0.1 Repository Setup
-- [ ] `[ci]` Initialize Git repository with `main` as default branch
-- [ ] `[ci]` Add `.gitignore` (Rust standard: `target/`, `Cargo.lock` for libraries)
-- [ ] `[ci]` Add `rust-toolchain.toml` pinning stable channel, MSRV 1.75
-- [ ] `[ci]` Add `.cargo/config.toml` with `[alias]` for common workspace commands
-- [ ] `[doc]` Add `LICENSE-MIT` and `LICENSE-APACHE` files at workspace root
-- [ ] `[doc]` Add `CONTRIBUTING.md` with the citation-required policy
-- [ ] `[doc]` Add `CHANGELOG.md` (Keep a Changelog format)
-- [ ] `[doc]` Add `ARCHITECTURE.md` (this document's companion)
-- [ ] `[doc]` Add `README.md` at workspace root
+- [x] `[ci]` Initialize Git repository with `main` as default branch
+- [x] `[ci]` Add `.gitignore` (Rust standard: `target/`, `Cargo.lock` for libraries)
+- [x] `[ci]` Add `rust-toolchain.toml` pinning stable channel, MSRV 1.80
+- [x] `[ci]` Add `.cargo/config.toml` with `[alias]` for common workspace commands
+- [x] `[doc]` Add `LICENSE-MIT` and `LICENSE-APACHE` files at workspace root
+- [x] `[doc]` Add `CONTRIBUTING.md` with the citation-required policy
+- [x] `[doc]` Add `CHANGELOG.md` (Keep a Changelog format)
+- [x] `[doc]` Add `ARCHITECTURE.md` (this document's companion)
+- [x] `[doc]` Add `README.md` at workspace root
 
 ### 0.2 Workspace Cargo.toml
 - [ ] `[impl]` Create `Cargo.toml` workspace root listing all member crates
@@ -39,7 +39,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Add `[workspace.metadata.release]` for `cargo-release` config
 
 ### 0.3 CI Pipeline (GitHub Actions)
-- [ ] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.75
+- [ ] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.80
 - [ ] `[ci]` Add WASM compilation check job:
   `cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features`
 - [ ] `[ci]` Add `cargo test --no-default-features` job (verifies `no_std` compilability)
@@ -454,7 +454,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Add property-based tests (via `proptest`) for all `CalendarDate::from_jdn` impls
 - [ ] `[test]` Add benchmark suite (`criterion`) for JDN pivot functions
 - [ ] `[test]` Full WASM build matrix: all `no_std` crates on `wasm32-unknown-unknown`
-- [ ] `[test]` MSRV check: `cargo +1.75 test --workspace`
+- [ ] `[test]` MSRV check: `cargo +1.80 test --workspace`
 
 ### CI Additions for v1.0
 - [ ] `[ci]` Add `cargo semver-checks` to CI (detects unintentional breaking changes)
