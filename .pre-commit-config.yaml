@@ -39,10 +39,11 @@ repos:
     hooks:
       - id: rustfmt
         name: rustfmt
-        entry: rustfmt --all
+        entry: rustfmt
         language: system
         description: Format Rust code with rustfmt
         files: '^.*\.rs$'
+        types: [rust]
 
       - id: cargo-audit
         name: cargo-audit

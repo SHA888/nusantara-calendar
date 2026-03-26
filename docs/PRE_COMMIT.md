@@ -9,7 +9,7 @@ This project uses [pre-commit](https://pre-commit.com/) to ensure code quality a
    # On Ubuntu/Debian
    sudo apt-get update
    sudo apt-get install pre-commit
-   
+
    # On other systems, check package manager or use:
    # pip install pre-commit (if system package not available)
    ```

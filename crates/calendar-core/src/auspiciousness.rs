@@ -1,12 +1,12 @@
 //! Auspiciousness system for Indonesian calendars
-//! 
+//!
 //! This module defines the activity types and auspiciousness levels
 //! used across various Indonesian calendar systems.
 
 use alloc::string::String;
 
 /// Activities that can be evaluated for auspiciousness
-/// 
+///
 /// These represent common activities in Indonesian culture that
 /// may be scheduled based on calendar auspiciousness.
 #[non_exhaustive]
@@ -38,25 +38,26 @@ pub enum Activity {
 
 impl Activity {
     /// Get a human-readable description of the activity
+    #[must_use]
     pub fn description(&self) -> &str {
         match self {
-            Activity::Marriage => "Marriage ceremonies and weddings",
-            Activity::Building => "Building construction and foundation laying",
-            Activity::Travel => "Travel and journeys",
-            Activity::Business => "Business ventures and commerce",
-            Activity::Agriculture => "Agricultural activities and planting",
-            Activity::ReligiousCeremony => "Religious ceremonies and rituals",
-            Activity::Naming => "Naming ceremonies for children",
-            Activity::MovingHouse => "Moving to a new house or residence",
-            Activity::Education => "Starting education or learning",
-            Activity::Medical => "Medical treatments and procedures",
-            Activity::Custom(desc) => desc,
+            Self::Marriage => "Marriage ceremonies and weddings",
+            Self::Building => "Building construction and foundation laying",
+            Self::Travel => "Travel and journeys",
+            Self::Business => "Business ventures and commerce",
+            Self::Agriculture => "Agricultural activities and planting",
+            Self::ReligiousCeremony => "Religious ceremonies and rituals",
+            Self::Naming => "Naming ceremonies for children",
+            Self::MovingHouse => "Moving to a new house or residence",
+            Self::Education => "Starting education or learning",
+            Self::Medical => "Medical treatments and procedures",
+            Self::Custom(desc) => desc,
         }
     }
 }
 
 /// Auspiciousness levels for calendar days
-/// 
+///
 /// These levels indicate how favorable a day is for various activities
 /// in Indonesian cultural traditions.
 #[non_exhaustive]
@@ -76,39 +77,45 @@ pub enum AuspiciousnessLevel {
 
 impl AuspiciousnessLevel {
     /// Get a human-readable description of the level
-    pub fn description(&self) -> &'static str {
+    #[must_use]
+    pub const fn description(&self) -> &'static str {
         match self {
-            AuspiciousnessLevel::VeryAuspicious => "Very auspicious - extremely favorable",
-            AuspiciousnessLevel::Auspicious => "Auspicious - favorable",
-            AuspiciousnessLevel::Neutral => "Neutral - neither favorable nor unfavorable",
-            AuspiciousnessLevel::Inauspicious => "Inauspicious - unfavorable",
-            AuspiciousnessLevel::VeryInauspicious => "Very inauspicious - very unfavorable",
+            Self::VeryAuspicious => "Very auspicious - extremely favorable",
+            Self::Auspicious => "Auspicious - favorable",
+            Self::Neutral => "Neutral - neither favorable nor unfavorable",
+            Self::Inauspicious => "Inauspicious - unfavorable",
+            Self::VeryInauspicious => "Very inauspicious - very unfavorable",
         }
     }
-    
+
     /// Check if the level is auspicious (favorable)
-    pub fn is_auspicious(self) -> bool {
-        matches!(self, AuspiciousnessLevel::Auspicious | AuspiciousnessLevel::VeryAuspicious)
+    #[must_use]
+    pub const fn is_auspicious(self) -> bool {
+        matches!(self, Self::Auspicious | Self::VeryAuspicious)
     }
-    
+
     /// Check if the level is very auspicious
-    pub fn is_very_auspicious(self) -> bool {
-        matches!(self, AuspiciousnessLevel::VeryAuspicious)
+    #[must_use]
+    pub const fn is_very_auspicious(self) -> bool {
+        matches!(self, Self::VeryAuspicious)
     }
-    
+
     /// Check if the level is inauspicious (unfavorable)
-    pub fn is_inauspicious(self) -> bool {
-        matches!(self, AuspiciousnessLevel::Inauspicious | AuspiciousnessLevel::VeryInauspicious)
+    #[must_use]
+    pub const fn is_inauspicious(self) -> bool {
+        matches!(self, Self::Inauspicious | Self::VeryInauspicious)
     }
-    
+
     /// Check if the level is very inauspicious
-    pub fn is_very_inauspicious(self) -> bool {
-        matches!(self, AuspiciousnessLevel::VeryInauspicious)
+    #[must_use]
+    pub const fn is_very_inauspicious(self) -> bool {
+        matches!(self, Self::VeryInauspicious)
     }
-    
+
     /// Check if the level is neutral
-    pub fn is_neutral(self) -> bool {
-        matches!(self, AuspiciousnessLevel::Neutral)
+    #[must_use]
+    pub const fn is_neutral(self) -> bool {
+        matches!(self, Self::Neutral)
     }
 }
 

@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 
 //! chinese-nusantara Calendar Implementation
-//! 
+//!
 //! This crate provides the chinese-nusantara calendar system as part of the
 //! nusantara-calendar workspace.
 
@@ -10,6 +10,12 @@ extern crate alloc;
 
 /// Placeholder implementation for chinese-nusantara calendar
 pub struct ChineseNusantaraCalendar;
+
+impl Default for ChineseNusantaraCalendar {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl ChineseNusantaraCalendar {
     /// Create a new chinese-nusantara calendar instance

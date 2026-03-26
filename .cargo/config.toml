@@ -17,7 +17,7 @@ doc = "doc --no-deps"
 doc-open = "doc --open --no-deps"
 
 # Formatting and linting
-clippy = "clippy -- -D warnings"
+# Note: clippy is an external subcommand, not aliased to avoid shadowing
 
 # Workspace management
 ws-tree = "tree --workspace --all"

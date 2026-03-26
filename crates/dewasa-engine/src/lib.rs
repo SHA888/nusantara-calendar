@@ -2,17 +2,23 @@
 #![warn(missing_docs)]
 
 //! dewasa-engine Calendar Implementation
-//! 
+//!
 //! This crate provides the dewasa-engine calendar system as part of the
 //! nusantara-calendar workspace.
 
 extern crate alloc;
 
-/// Placeholder implementation for dewasa-engine calendar
-pub struct DewasaEngineCalendar;
+/// Placeholder implementation for Dewasa engine
+pub struct DewasaEngine;
 
-impl DewasaEngineCalendar {
-    /// Create a new dewasa-engine calendar instance
+impl Default for DewasaEngine {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl DewasaEngine {
+    /// Create a new Dewasa engine instance
     pub fn new() -> Self {
         Self
     }

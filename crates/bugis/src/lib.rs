@@ -2,7 +2,7 @@
 #![warn(missing_docs)]
 
 //! bugis Calendar Implementation
-//! 
+//!
 //! This crate provides the bugis calendar system as part of the
 //! nusantara-calendar workspace.
 
@@ -10,6 +10,12 @@ extern crate alloc;
 
 /// Placeholder implementation for bugis calendar
 pub struct BugisCalendar;
+
+impl Default for BugisCalendar {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl BugisCalendar {
     /// Create a new bugis calendar instance
