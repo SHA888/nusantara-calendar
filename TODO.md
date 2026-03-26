@@ -56,38 +56,39 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Tag:** `calendar-core-v0.1.0`
 
 ### Design
-- [ ] `[arch]` Confirm `i64` for JDN, `u32` for cycle-year fields, `u8` for sub-year positions
-- [ ] `[arch]` Confirm `CalendarDate`, `CalendarMetadata`, `HasAuspiciousness` trait signatures
-- [ ] `[arch]` Confirm `Activity` and `AuspiciousnessLevel` variants with `#[non_exhaustive]`
-- [ ] `[arch]` Decide `CalendarError` string type: `String` (alloc) vs `&'static str` (no-alloc)
+- [x] `[arch]` Confirm `i64` for JDN, `u32` for cycle-year fields, `u8` for sub-year positions
+- [x] `[arch]` Confirm `CalendarDate`, `CalendarMetadata`, `HasAuspiciousness` trait signatures
+- [x] `[arch]` Confirm `Activity` and `AuspiciousnessLevel` variants with `#[non_exhaustive]`
+- [x] `[arch]` Decide `CalendarError` string type: `String` (alloc) vs `&'static str` (no-alloc)
       → Decision: `String` (alloc); all `no_std` targets have `alloc` available
 
 ### Implementation
-- [ ] `[impl]` Create `crates/calendar-core/` with `Cargo.toml`, `src/lib.rs`
-- [ ] `[impl]` Implement `gregorian_to_jdn(y: i32, m: u8, d: u8) -> i64` as `pub const fn`
+- [x] `[impl]` Create `crates/calendar-core/` with `Cargo.toml`, `src/lib.rs`
+- [x] `[impl]` Implement `gregorian_to_jdn(y: i32, m: u8, d: u8) -> i64` as `pub const fn`
       (Meeus, *Astronomical Algorithms*, Ch. 7)
-- [ ] `[impl]` Implement `jdn_to_gregorian(jdn: i64) -> (i32, u8, u8)` as `pub const fn`
-- [ ] `[impl]` Define `CalendarDate` trait with default `from_gregorian` / `to_gregorian`
-- [ ] `[impl]` Define `CalendarMetadata` trait
-- [ ] `[impl]` Define `HasAuspiciousness` trait
-- [ ] `[impl]` Define `Activity` enum (`#[non_exhaustive]`)
-- [ ] `[impl]` Define `AuspiciousnessLevel` enum (`#[non_exhaustive]`)
-- [ ] `[impl]` Define `CalendarError` with `thiserror`; `OutOfRange`, `NotImplemented`, `Ambiguous`
-- [ ] `[impl]` Implement `stub!()` macro; export with `#[macro_export]`
-- [ ] `[impl]` Add `#![no_std]` + `extern crate alloc` with `std` feature gate
+- [x] `[impl]` Implement `jdn_to_gregorian(jdn: i64) -> (i32, u8, u8)` as `pub const fn`
+- [x] `[impl]` Define `CalendarDate` trait with default `from_gregorian` / `to_gregorian`
+- [x] `[impl]` Define `CalendarMetadata` trait
+- [x] `[impl]` Define `HasAuspiciousness` trait
+- [x] `[impl]` Define `Activity` enum (`#[non_exhaustive]`)
+- [x] `[impl]` Define `AuspiciousnessLevel` enum (`#[non_exhaustive]`)
+- [x] `[impl]` Define `CalendarError` with `thiserror`; `OutOfRange`, `NotImplemented`, `Ambiguous`
+- [x] `[impl]` Implement `stub!()` macro; export with `#[macro_export]`
+- [x] `[impl]` Add `#![no_std]` + `extern crate alloc` with `std` feature gate
 
 ### Testing
-- [ ] `[test]` Unit test: `gregorian_to_jdn(1582, 10, 15) == 2299161` (reform anchor)
-- [ ] `[test]` Unit test: `gregorian_to_jdn(1633, 7, 8) == 2317690` (Sultan Agung epoch)
-- [ ] `[test]` Round-trip property test: 1000 random JDNs round-trip through `jdn_to_gregorian` → `gregorian_to_jdn`
-- [ ] `[test]` Verify `stub!()` returns `Err(CalendarError::NotImplemented(_))`
-- [ ] `[test]` `cargo test --no-default-features` passes (no_std)
-- [ ] `[test]` WASM build: `cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features`
+- [x] `[test]` Unit test: `gregorian_to_jdn(1582, 10, 15) == 2299161` (reform anchor)
+- [x] `[test]` Unit test: `gregorian_to_jdn(1633, 7, 8) == 2317690` (Sultan Agung epoch)
+- [x] `[test]` Round-trip property test: 1000 random JDNs round-trip through `jdn_to_gregorian` → `gregorian_to_jdn`
+- [x] `[test]` Verify `stub!()` returns `Err(CalendarError::NotImplemented(_))`
+- [x] `[test]` `cargo test --no-default-features` passes (no_std)
+- [x] `[test]` WASM build: `cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features`
+- [x] `[test]` Fix JDN to Gregorian conversion using Fliegel & van Flandern algorithm (all 10 tests passing)
 
 ### Documentation
-- [ ] `[doc]` Full rustdoc on all public items
-- [ ] `[doc]` Crate-level `//!` doc with JDN pivot explanation and Meeus citation
-- [ ] `[doc]` `reference_sources()` contract note in `CalendarMetadata` doc
+- [x] `[doc]` Full rustdoc on all public items
+- [x] `[doc]` Crate-level `//!` doc with JDN pivot explanation and Meeus citation
+- [x] `[doc]` `reference_sources()` contract note in `CalendarMetadata` doc
 
 ### Release
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.1.0]` section
