@@ -1,5 +1,4 @@
 #![cfg_attr(not(feature = "std"), no_std)]
-#![warn(missing_docs)]
 
 //! Javanese Calendar Implementation
 //! 
@@ -9,6 +8,9 @@
 extern crate alloc;
 
 /// Placeholder implementation for Javanese calendar
+/// 
+/// This is a temporary placeholder for the Javanese calendar system.
+/// The full implementation will be added in a future release.
 pub struct JawaCalendar;
 
 impl JawaCalendar {
