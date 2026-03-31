@@ -91,10 +91,10 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [x] `[doc]` `reference_sources()` contract note in `CalendarMetadata` doc
 
 ### Release
-- [ ] `[rel]` Update `CHANGELOG.md` — `## [0.1.0]` section
-- [ ] `[rel]` `cargo publish -p calendar-core --dry-run`
-- [ ] `[rel]` Tag `calendar-core-v0.1.0`
-- [ ] `[rel]` `cargo publish -p calendar-core`
+- [x] `[rel]` Update `CHANGELOG.md` — `## [0.1.0]` section
+- [x] `[rel]` `cargo publish -p calendar-core --dry-run`
+- [x] `[rel]` Tag `calendar-core-v0.1.0`
+- [x] `[rel]` `cargo publish -p calendar-core`
 
 ---
 
