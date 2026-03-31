@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![warn(missing_docs)]
 
-//! tengger Calendar Implementation
+//! Tengger Calendar Implementation
 //!
 //! This crate provides the tengger calendar system as part of the
 //! nusantara-calendar workspace.
@@ -8,6 +9,7 @@
 extern crate alloc;
 
 /// Placeholder implementation for tengger calendar
+#[non_exhaustive]
 pub struct TenggerCalendar;
 
 impl Default for TenggerCalendar {

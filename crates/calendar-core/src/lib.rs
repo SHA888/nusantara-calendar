@@ -153,16 +153,16 @@ impl std::error::Error for CalendarError {}
 /// # Required Implementations
 ///
 /// Calendar types must implement:
-/// - [`from_jdn()`] - Convert from JDN to calendar date
-/// - [`to_jdn()`] - Convert from calendar date to JDN
-/// - [`calendar_name()`] - Return the calendar system name
-/// - [`validate_range()`] - Check if date is within supported range
+/// - [`Self::from_jdn()`] - Convert from JDN to calendar date
+/// - [`Self::to_jdn()`] - Convert from calendar date to JDN
+/// - [`Self::calendar_name()`] - Return the calendar system name
+/// - [`Self::validate_range()`] - Check if date is within supported range
 ///
 /// # Provided Implementations
 ///
 /// Default implementations are provided for:
-/// - [`from_gregorian()`] - Convert via JDN intermediate
-/// - [`to_gregorian()`] - Convert via JDN intermediate
+/// - [`Self::from_gregorian()`] - Convert via JDN intermediate
+/// - [`Self::to_gregorian()`] - Convert via JDN intermediate
 ///
 /// # Implementation Guidelines
 ///
@@ -248,14 +248,14 @@ pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
     ///
     /// - Should handle edge cases like epoch dates, leap years, etc.
     /// - Must return appropriate errors for invalid inputs
-    /// - Should be the inverse of [`to_jdn()`] for valid dates
+    /// - Should be the inverse of [`Self::to_jdn()`] for valid dates
     fn from_jdn(jdn: JDN) -> Result<Self, CalendarError>
     where
         Self: Sized;
 
     /// Convert from this calendar's date to Julian Day Number
     ///
-    /// This method should provide the exact inverse of [`from_jdn()`]
+    /// This method should provide the exact inverse of [`Self::from_jdn()`]
     /// for all valid dates in the calendar's supported range.
     ///
     /// # Returns
@@ -265,7 +265,7 @@ pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
     ///
     /// - Must handle calendar-specific rules (leap months, etc.)
     /// - Should return consistent results for the same date
-    /// - Round-trip with [`from_jdn()`] should preserve the original date
+    /// - Round-trip with [`Self::from_jdn()`] should preserve the original date
     fn to_jdn(&self) -> JDN;
 
     /// Get the calendar system name
@@ -561,11 +561,11 @@ pub trait HasAuspiciousness {
     ///
     /// # Standard Levels
     ///
-    /// - [`VeryAuspicious`] - Extremely favorable for the activity
-    /// - [`Auspicious`] - Favorable for the activity
-    /// - [`Neutral`] - Neither favorable nor unfavorable
-    /// - [`Inauspicious`] - Unfavorable for the activity
-    /// - [`VeryInauspicious`] - Extremely unfavorable for the activity
+    /// - `VeryAuspicious` - Extremely favorable for the activity
+    /// - `Auspicious` - Favorable for the activity
+    /// - `Neutral` - Neither favorable nor unfavorable
+    /// - `Inauspicious` - Unfavorable for the activity
+    /// - `VeryInauspicious` - Extremely unfavorable for the activity
     type AuspiciousnessLevel;
 
     /// Determine the auspiciousness level for a given activity

@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![warn(missing_docs)]
 
-//! toraja Calendar Implementation
+//! Toraja Calendar Implementation
 //!
 //! This crate provides the toraja calendar system as part of the
 //! nusantara-calendar workspace.
@@ -8,6 +9,7 @@
 extern crate alloc;
 
 /// Placeholder implementation for toraja calendar
+#[non_exhaustive]
 pub struct TorajaCalendar;
 
 impl Default for TorajaCalendar {

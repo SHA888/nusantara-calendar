@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
+#![warn(missing_docs)]
 
-//! sasak Calendar Implementation
+//! Sasak Calendar Implementation
 //!
 //! This crate provides the sasak calendar system as part of the
 //! nusantara-calendar workspace.
@@ -8,6 +9,7 @@
 extern crate alloc;
 
 /// Placeholder implementation for sasak calendar
+#[non_exhaustive]
 pub struct SasakCalendar;
 
 impl Default for SasakCalendar {

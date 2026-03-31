@@ -1,7 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![warn(missing_docs)]
 
-//! batak Calendar Implementation
+//! Batak Calendar Implementation
 //!
 //! This crate provides the batak calendar system as part of the
 //! nusantara-calendar workspace.
@@ -9,6 +9,7 @@
 extern crate alloc;
 
 /// Placeholder implementation for batak calendar
+#[non_exhaustive]
 pub struct BatakCalendar;
 
 impl Default for BatakCalendar {

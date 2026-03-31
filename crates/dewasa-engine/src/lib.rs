@@ -9,6 +9,7 @@
 extern crate alloc;
 
 /// Placeholder implementation for Dewasa engine
+#[non_exhaustive]
 pub struct DewasaEngine;
 
 impl Default for DewasaEngine {
