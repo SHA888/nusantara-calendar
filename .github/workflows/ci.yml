@@ -24,7 +24,7 @@ jobs:
         components: rustfmt, clippy
 
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
@@ -32,7 +32,7 @@ jobs:
           ${{ runner.os }}-cargo-registry-
 
     - name: Cache cargo index
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
@@ -40,7 +40,7 @@ jobs:
           ${{ runner.os }}-cargo-index-
 
     - name: Cache cargo build
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: target
         key: ${{ runner.os }}-cargo-target-${{ hashFiles('**/Cargo.lock') }}
@@ -72,7 +72,7 @@ jobs:
         components: rustfmt
 
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-msrv-${{ hashFiles('**/Cargo.lock') }}
@@ -80,7 +80,7 @@ jobs:
           ${{ runner.os }}-cargo-registry-msrv-
 
     - name: Cache cargo index
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-msrv-${{ hashFiles('**/Cargo.lock') }}
@@ -88,7 +88,7 @@ jobs:
           ${{ runner.os }}-cargo-index-msrv-
 
     - name: Cache cargo build
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: target
         key: ${{ runner.os }}-cargo-target-msrv-${{ hashFiles('**/Cargo.lock') }}
@@ -118,7 +118,7 @@ jobs:
       run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
 
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-wasm-${{ hashFiles('**/Cargo.lock') }}
@@ -126,7 +126,7 @@ jobs:
           ${{ runner.os }}-cargo-registry-wasm-
 
     - name: Cache cargo index
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-wasm-${{ hashFiles('**/Cargo.lock') }}
@@ -153,7 +153,7 @@ jobs:
       uses: dtolnay/rust-toolchain@stable
 
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-docs-${{ hashFiles('**/Cargo.lock') }}
@@ -161,7 +161,7 @@ jobs:
           ${{ runner.os }}-cargo-registry-docs-
 
     - name: Cache cargo index
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-docs-${{ hashFiles('**/Cargo.lock') }}
@@ -169,7 +169,7 @@ jobs:
           ${{ runner.os }}-cargo-index-docs-
 
     - name: Cache cargo build
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: target
         key: ${{ runner.os }}-cargo-target-docs-${{ hashFiles('**/Cargo.lock') }}
@@ -196,7 +196,7 @@ jobs:
       run: cargo install cargo-deny --locked
 
     - name: Cache cargo registry
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/registry
         key: ${{ runner.os }}-cargo-registry-deny-${{ hashFiles('**/Cargo.lock') }}
@@ -204,7 +204,7 @@ jobs:
           ${{ runner.os }}-cargo-registry-deny-
 
     - name: Cache cargo index
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: ~/.cargo/git
         key: ${{ runner.os }}-cargo-index-deny-${{ hashFiles('**/Cargo.lock') }}
