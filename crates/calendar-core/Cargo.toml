@@ -7,6 +7,8 @@ license = "MIT OR Apache-2.0"
 description = "Core traits and utilities for nusantara-calendar workspace"
 repository = "https://github.com/SHA888/nusantara-calendar"
 authors = ["Nusantara Calendar Contributors"]
+keywords = ["calendar", "traits", "nusantara", "indonesia"]
+categories = ["date-and-time"]
 
 [dependencies]
 # Use workspace dependencies
@@ -16,7 +18,6 @@ thiserror = { workspace = true }
 default = ["std"]
 std = []
 serde = ["dep:serde"]
-wasm = []
 
 [dependencies.serde]
 workspace = true

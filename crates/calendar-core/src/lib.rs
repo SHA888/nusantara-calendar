@@ -307,7 +307,7 @@ pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
     /// Convert from Gregorian date to this calendar's date
     ///
     /// Default implementation uses JDN as intermediate format:
-    /// Gregorian → JDN → Calendar Date
+    /// Gregorian -> JDN -> Calendar Date
     ///
     /// # Arguments
     /// * `year` - Gregorian year (CE, can be negative for BCE)
@@ -323,9 +323,9 @@ pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
     ///
     /// # Performance
     ///
-    /// This involves two conversions: Gregorian→JDN and JDN→Calendar.
+    /// This involves two conversions: Gregorian->JDN and JDN->Calendar.
     /// For performance-critical applications, consider implementing
-    /// direct Gregorian→Calendar conversion if the calendar system
+    /// direct Gregorian->Calendar conversion if the calendar system
     /// has a known relationship with the Gregorian calendar.
     fn from_gregorian(year: i32, month: u8, day: u8) -> Result<Self, CalendarError>
     where
@@ -338,16 +338,16 @@ pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
     /// Convert from this calendar's date to Gregorian date
     ///
     /// Default implementation uses JDN as intermediate format:
-    /// Calendar Date → JDN → Gregorian
+    /// Calendar Date -> JDN -> Gregorian
     ///
     /// # Returns
     /// Tuple of (year, month, day) in Gregorian calendar
     ///
     /// # Performance
     ///
-    /// This involves two conversions: Calendar→JDN and JDN→Gregorian.
+    /// This involves two conversions: Calendar->JDN and JDN->Gregorian.
     /// For performance-critical applications, consider implementing
-    /// direct Calendar→Gregorian conversion if possible.
+    /// direct Calendar->Gregorian conversion if possible.
     fn to_gregorian(&self) -> (i32, u8, u8) {
         jdn_to_gregorian(self.to_jdn())
     }

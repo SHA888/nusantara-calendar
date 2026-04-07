@@ -1,0 +1,58 @@
+[package]
+name = "nusantara-calendar"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.80"
+license = "MIT OR Apache-2.0"
+description = "Nusantara calendar systems with calendar-core integration - Balinese, Jawa, Hijriyah, and more"
+homepage = "https://github.com/SHA888/nusantara-calendar"
+repository = "https://github.com/SHA888/nusantara-calendar"
+authors = ["Nusantara Calendar Contributors"]
+keywords = ["calendar", "balinese", "jawa", "hijriyah", "nusantara", "indonesia"]
+categories = ["date-and-time"]
+
+[dependencies]
+# Core dependencies
+calendar-core = { path = "../calendar-core", version = "0.1" }
+thiserror = { version = "2", optional = true }
+serde = { version = "1", features = ["derive"], optional = true }
+wasm-bindgen = { version = "0.2", optional = true }
+libm = { version = "0.2", optional = true }
+
+# External calendar dependencies
+balinese-calendar = { version = "0.2", optional = true }
+nongli = { version = "0.4", optional = true }  # Chinese calendar, license audit required
+
+[features]
+default = ["std"]
+std = ["thiserror", "calendar-core/std"]
+serde = ["dep:serde", "calendar-core/serde"]
+wasm = ["calendar-core/wasm-bindgen", "wasm-bindgen"]
+
+# Calendar system features
+balinese = ["balinese-calendar"]
+jawa = ["std"]
+hijriyah = ["std"]
+batak = ["std"]
+sunda = ["std"]
+tengger = ["std"]
+bugis = ["std"]
+sasak = ["std"]
+dayak = ["std"]
+toraja = ["std"]
+minangkabau = ["std"]
+chinese-nusantara = ["nongli"]
+dewasa-engine = ["std"]
+
+# Convenience feature groups
+all-calendars = ["balinese", "jawa", "hijriyah", "batak", "sunda", "tengger", "bugis", "sasak", "dayak", "toraja", "minangkabau", "chinese-nusantara"]
+all = ["all-calendars", "dewasa-engine"]
+
+[lints.rust]
+unsafe_code = "deny"
+missing_docs = "warn"
+
+[lints.clippy]
+all = "warn"
+pedantic = "warn"
+nursery = "warn"

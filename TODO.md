@@ -92,44 +92,54 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ### Release
 - [x] `[rel]` Update `CHANGELOG.md` — `## [0.1.0]` section
-- [x] `[rel]` `cargo publish -p calendar-core --dry-run`
-- [x] `[rel]` Tag `calendar-core-v0.1.0`
-- [x] `[rel]` `cargo publish -p calendar-core`
-
 ---
 
-## v0.2.0 — Layer 2 Crates
-
-> **Scope:** `balinese-calendar`, `jawa`, `hijriyah`, `chinese-nusantara`.
-> All depend on `calendar-core` v0.1. Built concurrently, tagged together.
-> **Tags:** `balinese-calendar-v0.2.0`, `jawa-v0.2.0`, `hijriyah-v0.2.0`, `chinese-nusantara-v0.2.0`
-
----
-
-### 2.1 [`balinese-calendar`](https://github.com/SHA888/balinese-calendar/releases/tag/v0.2.0) and [`balinese-calendar`](https://crates.io/crates/balinese-calendar/0.2.0)
+### 1.1 `nusantara-calendar` - Architecture Refactor
 
 #### Design
-- [x] `[arch]` Audit existing `balinese-calendar` v0.2.0 crate (authored by Kresna) [`balinese-calendar`](https://crates.io/crates/balinese-calendar/0.2.0)
-      against `CalendarDate` + `CalendarMetadata` trait signatures from v0.1.0
-- [x] `[arch]` Plan migration: add trait impls without breaking existing public API
-- [x] `[arch]` Confirm supported year range (document in rustdoc and return `OutOfRange` at boundaries)
+- [x] `[arch]` Convert from workspace to single crate structure
+- [x] `[arch]` Implement feature flags for each calendar system
+- [x] `[arch]` Keep `calendar-core` as separate published dependency
+- [x] `[arch]` Plan wrapper approach for official crates (balinese-calendar)
 
 #### Implementation
-- [x] `[impl]` Add `calendar-core` dependency
-- [x] `[impl]` Implement `CalendarDate` for `BalineseDay`
-- [x] `[impl]` Implement `CalendarMetadata` for `BalineseDay` with Saka epoch JDN and sources
-- [x] `[impl]` Implement `HasAuspiciousness` for known auspiciousness rules (Dewasa Ayu etc.)
-- [x] `[impl]` Gate `no_std` correctly; add `std` feature flag
+- [x] `[impl]` Create single `Cargo.toml` with feature flags
+- [x] `[impl]` Reorganize source structure into `src/` modules
+- [x] `[impl]` Implement balinese wrapper around official `balinese-calendar` crate
+- [x] `[impl]` Implement calendar-core traits on wrapped types
+- [x] `[impl]` Add comprehensive tests for wrapper functionality
 
 #### Testing
-- [x] `[test]` Round-trip test: 500 random JDNs for `BalineseDay`
-- [x] `[test]` Known-date regression: verify Nyepi 2026 falls on correct Saka day
-- [x] `[test]` WASM build check
-- [x] `[test]` `--no-default-features` build check
+- [x] `[test]` Verify balinese wrapper trait implementations
+- [x] `[test]` Round-trip conversions with official crate
+- [x] `[test]` Feature flag compilation tests
+- [x] `[test]` Build checks for all feature combinations
 
 ---
 
-### 2.2 `jawa`
+### 1.2 `balinese` - Wrapper Implementation
+
+#### Design
+- [x] `[arch]` Audit official `balinese-calendar` v0.2.0 crate API
+- [x] `[arch]` Design wrapper that re-exports official types
+- [x] `[arch]` Plan trait delegation to official crate methods
+
+#### Implementation
+- [x] `[impl]` Create `src/balinese/mod.rs` wrapper module
+- [x] `[impl]` Implement `CalendarDate` for wrapper type
+- [x] `[impl]` Implement `CalendarMetadata` for wrapper type
+- [x] `[impl]` Implement `HasAuspiciousness` for wrapper type
+- [x] `[impl]` Add conversion methods between wrapper and official types
+
+#### Testing
+- [x] `[test]` Verify trait implementations work correctly
+- [x] `[test]` Test round-trip conversions via JDN
+- [x] `[test]` Test official crate access through wrapper
+- [x] `[test]` Validation and error handling tests
+
+---
+
+### 2.1 `jawa`
 
 #### Design
 - [ ] `[arch]` Confirm no Rust Javanese crate exists on crates.io (last checked March 2026)

@@ -1,16 +1,13 @@
 # nusantara-calendar
 
-[![CI](https://img.shields.io/github/actions/workflow/status/your-org/nusantara-calendar/ci.yml?branch=main&label=CI)](https://github.com/your-org/nusantara-calendar/actions)
-[![crates.io](https://img.shields.io/crates/v/nusantara-calendar.svg)](https://crates.io/crates/nusantara-calendar)
-[![docs.rs](https://docs.rs/nusantara-calendar/badge.svg)](https://docs.rs/nusantara-calendar)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](#license)
-[![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)](https://blog.rust-lang.org/2024/07/25/Rust-1.80.0.html)
+![crates.io](https://img.shields.io/crates/v/nusantara-calendar.svg)
+![docs.rs](https://docs.rs/nusantara-calendar/badge.svg)
+![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)
+![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)
 
 A comprehensive Rust crate covering every traditional calendar system with a documented algorithmic basis across the Indonesian archipelago. This crate provides unified `calendar-core` trait integration for multiple Indonesian/Nusantara calendar systems.
 
 **This is the only library in any language targeting all of these calendar systems in a single, algorithmically grounded, source-attributed codebase.**
-
----
 
 ## Features
 
@@ -33,27 +30,6 @@ This crate uses feature flags to minimize compilation time and binary size:
 ### Convenience Feature Groups
 - `all-calendars` - Enable all calendar systems
 - `all` - Enable all features including dewasa-engine
-
----
-
-## Documentation
-
-### Workspace Documentation
-- **[Main README](README.md)** - This file - workspace overview and quick start
-- **[TODO.md](TODO.md)** - Implementation status and roadmap
-- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
-
-### Crate Documentation
-- **[calendar-core](crates/calendar-core/README.md)** - Core traits and utilities
-- **[calendar-core CHANGELOG](crates/calendar-core/CHANGELOG.md)** - Core library changes
-- **[nusantara-calendar](crates/nusantara-calendar/README.md)** - Calendar implementations
-- **[nusantara-calendar CHANGELOG](crates/nusantara-calendar/CHANGELOG.md)** - Main library changes
-
-### API Documentation
-- **[calendar-core docs.rs](https://docs.rs/calendar-core)** - Core API documentation
-- **[nusantara-calendar docs.rs](https://docs.rs/nusantara-calendar)** - Main API documentation
-
----
 
 ## Quick Start
 
@@ -95,9 +71,8 @@ use nusantara_calendar::dewasa_engine::{NusantaraDay, Activity};
 let day = NusantaraDay::from_gregorian(2026, 3, 21)?;
 let verdict = &day.cross_auspiciousness[&Activity::Marriage];
 println!("Overall:  {:?}", verdict.overall);
+println!("Conflicts: {:?}", verdict.conflicts);
 ```
-
----
 
 ## Architecture
 
@@ -123,7 +98,7 @@ The crate leverages official, maintained implementations where available:
 All calendar systems implement the `calendar-core` traits:
 
 - `CalendarDate` - Date conversion and validation
-- `CalendarMetadata` - Calendar metadata and epoch information
+- `CalendarMetadata` - Calendar metadata and epoch information  
 - `HasAuspiciousness` - Auspiciousness calculations
 
 ## Publishing
@@ -138,8 +113,6 @@ cargo publish -p calendar-core
 cargo publish -p nusantara-calendar
 ```
 
----
-
 ## Design Principles
 
 **Julian Day Number (JDN) as the universal pivot.** Every calendar converts through JDN. This means any two calendar systems can interoperate without knowing about each other directly.
@@ -149,8 +122,6 @@ cargo publish -p nusantara-calendar
 **Source attribution is a first-class requirement.** Every public type carries `# Sources` documentation linking to citable academic or primary sources.
 
 **Algorithmic correctness over feature completeness.** A `stub!()` with a citation is strictly better than a plausible-but-unverified implementation.
-
----
 
 ## Calendrical Scope
 
@@ -173,8 +144,6 @@ cargo publish -p nusantara-calendar
 - Batak supra-windu group names
 - Karo/Simalungun/Pakpak variant divergences
 
----
-
 ## `no_std` and WASM
 
 Core computation crates are `no_std + alloc` compatible. They compile to WASM32:
@@ -184,8 +153,6 @@ cargo build --target wasm32-unknown-unknown --features balinese,jawa
 ```
 
 `chinese-nusantara` and `dewasa-engine` are `std`-only and should be feature-gated in WASM contexts.
-
----
 
 ## Feature Flags
 
@@ -200,23 +167,27 @@ cargo build --target wasm32-unknown-unknown --features balinese,jawa
 | `all-calendars` | Enable all calendar systems |
 | `all` | Enable all features |
 
----
+## Key Dates & Constants
+
+```rust
+// jawa crate
+pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690; // 1633-07-08 Gregorian
+
+// Current kurup: Alip Selasa Pon, 1936-03-24 -> 2052-08-25
+// Current AJ year (March 2026): ~1959, Windu year = Wawu
+```
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under the [Apache License, Version 2.0](../../LICENSE).
 
 > **Note on dependencies**: This crate depends on `balinese-calendar` (MIT) and may depend on `nongli` (MIT) when the `chinese-nusantara` feature is enabled. All dependencies are license-compatible.
-
----
 
 ## Contributing
 
 Contributions are welcome, subject to one strict rule: **every algorithmic claim requires a citable source.** Undocumented "it works on my almanac" patches will not be merged.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) and [TODO.md](TODO.md) for implementation status.
-
----
+See [CONTRIBUTING.md](../../CONTRIBUTING.md) and [TODO.md](../../TODO.md) for implementation status.
 
 ## Acknowledgements
 

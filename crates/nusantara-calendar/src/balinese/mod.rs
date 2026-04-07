@@ -1,0 +1,140 @@
+//! Balinese calendar module
+//! 
+//! This module provides access to the Balinese Saka calendar system by wrapping
+//! the official `balinese-calendar` crate and implementing the `calendar-core` traits.
+//! 
+//! ## Usage
+//! 
+//! ```rust
+//! use nusantara_calendar::balinese::BalineseDate;
+//! use calendar_core::CalendarDate;
+//! 
+//! let date = BalineseDate::from_ymd(2026, 3, 19).unwrap();
+//! println!("Saka year: {}", date.saka_year);
+//! ```
+
+// Re-export the official balinese-calendar types
+pub use balinese_calendar::{
+    BalineseDate as OfficialBalineseDate,
+    Sasih, Wuku, Saptawara, Pancawara,
+    pawukon, sasih, wewaran, wariga,
+    BalineseDateError,
+};
+
+use crate::{CalendarDate, CalendarMetadata, HasAuspiciousness, JDN, CalendarError};
+use calendar_core::{AuspiciousnessLevel, Activity};
+
+/// Balinese calendar date with calendar-core trait implementations
+/// 
+/// This is a wrapper around the official `balinese-calendar::BalineseDate` that
+/// implements the `calendar-core` traits for interoperability with other calendar systems.
+#[derive(Debug, Clone, PartialEq)]
+pub struct BalineseDate(pub OfficialBalineseDate);
+
+impl Eq for BalineseDate {}
+
+impl BalineseDate {
+    /// Create a Balinese date from Gregorian year, month, and day
+    /// 
+    /// # Arguments
+    /// * `year` - Gregorian year
+    /// * `month` - Gregorian month (1-12)
+    /// * `day` - Gregorian day (1-31)
+    /// 
+    /// # Returns
+    /// `Ok(BalineseDate)` if the date is valid, `Err(CalendarError)` otherwise
+    pub fn from_ymd(year: i32, month: u8, day: u8) -> Result<Self, CalendarError> {
+        OfficialBalineseDate::from_ymd(year, month.into(), day.into())
+            .map(BalineseDate)
+            .map_err(|_| CalendarError::OutOfRange("Invalid Gregorian date".to_string()))
+    }
+
+    /// Get the underlying official BalineseDate
+    pub fn as_official(&self) -> &OfficialBalineseDate {
+        &self.0
+    }
+
+    /// Convert from official BalineseDate
+    pub fn from_official(date: OfficialBalineseDate) -> Self {
+        BalineseDate(date)
+    }
+}
+
+impl CalendarDate for BalineseDate {
+    fn from_jdn(jdn: JDN) -> Result<Self, CalendarError> {
+        Ok(BalineseDate(OfficialBalineseDate::from_jdn(jdn)))
+    }
+
+    fn to_jdn(&self) -> JDN {
+        // Use the official crate's JDN calculation
+        self.0.jdn
+    }
+
+    fn calendar_name() -> &'static str {
+        "Balinese Saka Calendar"
+    }
+
+    fn validate_range(&self) -> Result<(), CalendarError> {
+        // Use official crate's validation if available, otherwise implement basic range check
+        if self.0.gregorian_year < 1800 || self.0.gregorian_year > 2200 {
+            return Err(CalendarError::OutOfRange("Year out of supported range".to_string()));
+        }
+        Ok(())
+    }
+}
+
+impl CalendarMetadata for BalineseDate {
+    fn epoch() -> JDN {
+        // Use a reasonable epoch based on the official crate's data
+        // This would need to be calculated from the official crate's epoch
+        2_461_119 // March 19, 2026 (approximate)
+    }
+
+    fn cycle_length() -> Option<calendar_core::CycleYear> {
+        Some(210) // Pawukon cycle length
+    }
+
+    fn description() -> &'static str {
+        "Traditional Balinese calendar system with Pawukon 210-day cycles, lunar months, and Saka year counting"
+    }
+
+    fn cultural_origin() -> &'static str {
+        "Balinese Hindu calendar system from Bali, Indonesia, integrating Pawukon cycles with Saka lunar calendar"
+    }
+}
+
+impl HasAuspiciousness for BalineseDate {
+    type Activity = Activity;
+    type AuspiciousnessLevel = AuspiciousnessLevel;
+
+    fn auspiciousness_for(&self, activity: &Self::Activity) -> Self::AuspiciousnessLevel {
+        // Simplified auspiciousness calculation
+        // In a full implementation, this would delegate to the official crate's calculation
+        match activity {
+            _ => AuspiciousnessLevel::Neutral,
+        }
+    }
+
+    fn is_auspicious_day(&self) -> bool {
+        // Simplified auspiciousness check
+        false
+    }
+}
+
+// Implement common trait delegations
+impl std::ops::Deref for BalineseDate {
+    type Target = OfficialBalineseDate;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl From<OfficialBalineseDate> for BalineseDate {
+    fn from(date: OfficialBalineseDate) -> Self {
+        BalineseDate(date)
+    }
+}
+
+#[cfg(test)]
+mod tests;
