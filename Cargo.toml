@@ -17,6 +17,7 @@ members = [
 
     # Layer 2: Calendars with std dependencies
     "crates/chinese-nusantara",
+    "crates/balinese",
 
     # Layer 3: Aggregation engines
     "crates/dewasa-engine",

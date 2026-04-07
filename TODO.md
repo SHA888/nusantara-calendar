@@ -106,26 +106,26 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ---
 
-### 2.1 [`balinese-calendar`](https://github.com/SHA888/balinese-calendar)
+### 2.1 [`balinese-calendar`](https://github.com/SHA888/balinese-calendar/releases/tag/v0.2.0) and [`balinese-calendar`](https://crates.io/crates/balinese-calendar/0.2.0)
 
 #### Design
-- [ ] `[arch]` Audit existing `balinese-calendar` v0.1.1 crate (authored by Kresna)
+- [x] `[arch]` Audit existing `balinese-calendar` v0.2.0 crate (authored by Kresna) [`balinese-calendar`](https://crates.io/crates/balinese-calendar/0.2.0)
       against `CalendarDate` + `CalendarMetadata` trait signatures from v0.1.0
-- [ ] `[arch]` Plan migration: add trait impls without breaking existing public API
-- [ ] `[arch]` Confirm supported year range (document in rustdoc and return `OutOfRange` at boundaries)
+- [x] `[arch]` Plan migration: add trait impls without breaking existing public API
+- [x] `[arch]` Confirm supported year range (document in rustdoc and return `OutOfRange` at boundaries)
 
 #### Implementation
-- [ ] `[impl]` Add `calendar-core` dependency
-- [ ] `[impl]` Implement `CalendarDate` for `BalineseDay`
-- [ ] `[impl]` Implement `CalendarMetadata` for `BalineseDay` with Saka epoch JDN and sources
-- [ ] `[impl]` Implement `HasAuspiciousness` for known auspiciousness rules (Dewasa Ayu etc.)
-- [ ] `[impl]` Gate `no_std` correctly; add `std` feature flag
+- [x] `[impl]` Add `calendar-core` dependency
+- [x] `[impl]` Implement `CalendarDate` for `BalineseDay`
+- [x] `[impl]` Implement `CalendarMetadata` for `BalineseDay` with Saka epoch JDN and sources
+- [x] `[impl]` Implement `HasAuspiciousness` for known auspiciousness rules (Dewasa Ayu etc.)
+- [x] `[impl]` Gate `no_std` correctly; add `std` feature flag
 
 #### Testing
-- [ ] `[test]` Round-trip test: 500 random JDNs for `BalineseDay`
-- [ ] `[test]` Known-date regression: verify Nyepi 2026 falls on correct Saka day
-- [ ] `[test]` WASM build check
-- [ ] `[test]` `--no-default-features` build check
+- [x] `[test]` Round-trip test: 500 random JDNs for `BalineseDay`
+- [x] `[test]` Known-date regression: verify Nyepi 2026 falls on correct Saka day
+- [x] `[test]` WASM build check
+- [x] `[test]` `--no-default-features` build check
 
 ---
 
