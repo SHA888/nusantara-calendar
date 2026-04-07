@@ -98,7 +98,7 @@ The crate leverages official, maintained implementations where available:
 All calendar systems implement the `calendar-core` traits:
 
 - `CalendarDate` - Date conversion and validation
-- `CalendarMetadata` - Calendar metadata and epoch information  
+- `CalendarMetadata` - Calendar metadata and epoch information
 - `HasAuspiciousness` - Auspiciousness calculations
 
 ## Publishing

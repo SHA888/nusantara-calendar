@@ -1,13 +1,13 @@
 //! # Nusantara Calendar
-//! 
+//!
 //! A comprehensive collection of Indonesian/Nusantara calendar systems with unified
 //! `calendar-core` trait integration. This crate provides access to multiple traditional
 //! calendar systems used throughout the Indonesian archipelago.
-//! 
+//!
 //! ## Features
-//! 
+//!
 //! This crate uses feature flags to minimize compilation time and binary size:
-//! 
+//!
 //! - `balinese` - Balinese Saka calendar (wraps official `balinese-calendar` crate)
 //! - `jawa` - Javanese calendar system
 //! - `hijriyah` - Islamic calendar
@@ -21,29 +21,32 @@
 //! - `minangkabau` - Minangkabau calendar
 //! - `chinese-nusantara` - Chinese calendar adapted for Indonesian context
 //! - `dewasa-engine` - Auspiciousness calculation engine
-//! 
+//!
 //! ## Usage
-//! 
+//!
 //! Add this to your `Cargo.toml`:
-//! 
+//!
 //! ```toml
 //! [dependencies]
 //! nusantara-calendar = { version = "0.1", features = ["balinese", "jawa"] }
 //! ```
-//! 
+//!
 //! ## Example
-//! 
+//!
 //! ```rust
+//! # #[cfg(feature = "balinese")]
 //! use nusantara_calendar::balinese::BalineseDate;
 //! use calendar_core::CalendarDate;
-//! 
+//!
 //! // Create a Balinese date
+//! # #[cfg(feature = "balinese")]
 //! let date = BalineseDate::from_ymd(2026, 3, 19).unwrap();
+//! # #[cfg(feature = "balinese")]
 //! println!("Saka year: {}", date.saka_year);
 //! ```
-//! 
+//!
 //! ## License
-//! 
+//!
 //! Licensed under MIT or Apache-2.0.
 
 #![cfg_attr(not(feature = "std"), no_std)]
@@ -52,7 +55,7 @@
 extern crate alloc;
 
 // Re-export calendar-core traits
-pub use calendar_core::{CalendarDate, CalendarMetadata, HasAuspiciousness, JDN, CalendarError};
+pub use calendar_core::{CalendarDate, CalendarError, CalendarMetadata, HasAuspiciousness, JDN};
 
 // Calendar system modules (feature-gated)
 #[cfg(feature = "balinese")]
@@ -100,4 +103,5 @@ pub mod dewasa_engine;
 pub type BoxError = Box<dyn std::error::Error + Send + Sync>;
 
 #[cfg(not(feature = "std"))]
+/// Box error type for no_std environments
 pub type BoxError = &'static str;

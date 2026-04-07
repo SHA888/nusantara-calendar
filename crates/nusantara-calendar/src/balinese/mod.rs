@@ -1,31 +1,29 @@
 //! Balinese calendar module
-//! 
+//!
 //! This module provides access to the Balinese Saka calendar system by wrapping
 //! the official `balinese-calendar` crate and implementing the `calendar-core` traits.
-//! 
+//!
 //! ## Usage
-//! 
+//!
 //! ```rust
 //! use nusantara_calendar::balinese::BalineseDate;
 //! use calendar_core::CalendarDate;
-//! 
+//!
 //! let date = BalineseDate::from_ymd(2026, 3, 19).unwrap();
 //! println!("Saka year: {}", date.saka_year);
 //! ```
 
 // Re-export the official balinese-calendar types
 pub use balinese_calendar::{
-    BalineseDate as OfficialBalineseDate,
-    Sasih, Wuku, Saptawara, Pancawara,
-    pawukon, sasih, wewaran, wariga,
-    BalineseDateError,
+    pawukon, sasih, wariga, wewaran, BalineseDate as OfficialBalineseDate, BalineseDateError,
+    Pancawara, Saptawara, Sasih, Wuku,
 };
 
-use crate::{CalendarDate, CalendarMetadata, HasAuspiciousness, JDN, CalendarError};
-use calendar_core::{AuspiciousnessLevel, Activity};
+use crate::{CalendarDate, CalendarError, CalendarMetadata, HasAuspiciousness, JDN};
+use calendar_core::{Activity, AuspiciousnessLevel};
 
 /// Balinese calendar date with calendar-core trait implementations
-/// 
+///
 /// This is a wrapper around the official `balinese-calendar::BalineseDate` that
 /// implements the `calendar-core` traits for interoperability with other calendar systems.
 #[derive(Debug, Clone, PartialEq)]
@@ -35,34 +33,39 @@ impl Eq for BalineseDate {}
 
 impl BalineseDate {
     /// Create a Balinese date from Gregorian year, month, and day
-    /// 
+    ///
     /// # Arguments
     /// * `year` - Gregorian year
     /// * `month` - Gregorian month (1-12)
     /// * `day` - Gregorian day (1-31)
-    /// 
+    ///
     /// # Returns
     /// `Ok(BalineseDate)` if the date is valid, `Err(CalendarError)` otherwise
+    ///
+    /// # Errors
+    /// Returns `CalendarError::OutOfRange` if the Gregorian date is invalid
     pub fn from_ymd(year: i32, month: u8, day: u8) -> Result<Self, CalendarError> {
         OfficialBalineseDate::from_ymd(year, month.into(), day.into())
             .map(BalineseDate)
             .map_err(|_| CalendarError::OutOfRange("Invalid Gregorian date".to_string()))
     }
 
-    /// Get the underlying official BalineseDate
-    pub fn as_official(&self) -> &OfficialBalineseDate {
+    /// Get the underlying official `BalineseDate`
+    #[must_use]
+    pub const fn as_official(&self) -> &OfficialBalineseDate {
         &self.0
     }
 
-    /// Convert from official BalineseDate
-    pub fn from_official(date: OfficialBalineseDate) -> Self {
-        BalineseDate(date)
+    /// Convert from official `BalineseDate`
+    #[must_use]
+    pub const fn from_official(date: OfficialBalineseDate) -> Self {
+        Self(date)
     }
 }
 
 impl CalendarDate for BalineseDate {
     fn from_jdn(jdn: JDN) -> Result<Self, CalendarError> {
-        Ok(BalineseDate(OfficialBalineseDate::from_jdn(jdn)))
+        Ok(Self(OfficialBalineseDate::from_jdn(jdn)))
     }
 
     fn to_jdn(&self) -> JDN {
@@ -77,7 +80,9 @@ impl CalendarDate for BalineseDate {
     fn validate_range(&self) -> Result<(), CalendarError> {
         // Use official crate's validation if available, otherwise implement basic range check
         if self.0.gregorian_year < 1800 || self.0.gregorian_year > 2200 {
-            return Err(CalendarError::OutOfRange("Year out of supported range".to_string()));
+            return Err(CalendarError::OutOfRange(
+                "Year out of supported range".to_string(),
+            ));
         }
         Ok(())
     }
@@ -107,12 +112,10 @@ impl HasAuspiciousness for BalineseDate {
     type Activity = Activity;
     type AuspiciousnessLevel = AuspiciousnessLevel;
 
-    fn auspiciousness_for(&self, activity: &Self::Activity) -> Self::AuspiciousnessLevel {
+    fn auspiciousness_for(&self, _activity: &Self::Activity) -> Self::AuspiciousnessLevel {
         // Simplified auspiciousness calculation
         // In a full implementation, this would delegate to the official crate's calculation
-        match activity {
-            _ => AuspiciousnessLevel::Neutral,
-        }
+        AuspiciousnessLevel::Neutral
     }
 
     fn is_auspicious_day(&self) -> bool {
@@ -132,9 +135,9 @@ impl std::ops::Deref for BalineseDate {
 
 impl From<OfficialBalineseDate> for BalineseDate {
     fn from(date: OfficialBalineseDate) -> Self {
-        BalineseDate(date)
+        Self(date)
     }
 }
 
 #[cfg(test)]
-mod tests;
+mod balinese_module_tests;

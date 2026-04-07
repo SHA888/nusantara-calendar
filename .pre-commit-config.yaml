@@ -29,21 +29,22 @@ repos:
     hooks:
       - id: cargo-check
         description: Run cargo check to validate compilation
-        args: ['--workspace', '--all-targets']
+        args: ['--workspace', '--all-targets', '--all-features']
       - id: clippy
         description: Run cargo clippy for linting
-        args: ['--workspace', '--all-targets', '--', '-D', 'warnings']
+        args: ['--workspace', '--all-targets', '--all-features', '--', '-D', 'warnings']
 
   # Custom hooks for formatting, security, license, and documentation
   - repo: local
     hooks:
       - id: rustfmt
         name: rustfmt
-        entry: rustfmt
+        entry: cargo fmt --all
         language: system
         description: Format Rust code with rustfmt
         files: '^.*\.rs$'
         types: [rust]
+        pass_filenames: false
 
       - id: cargo-audit
         name: cargo-audit
@@ -63,7 +64,7 @@ repos:
 
       - id: cargo-doc
         name: cargo-doc
-        entry: cargo doc --no-deps --document-private-items --workspace
+        entry: cargo doc --no-deps --document-private-items --workspace --all-features
         language: system
         description: Build documentation to check for broken links
         files: '^src/.*\.rs$|^Cargo\.toml$'
@@ -75,6 +76,30 @@ repos:
         language: system
         description: Ensure crate names match directory names
         files: '^crates/.*Cargo\.toml$'
+
+      - id: test-workspace
+        name: test-workspace
+        entry: cargo test --workspace --all-features
+        language: system
+        description: Run all workspace tests with all features
+        files: '^src/.*\.rs$|^Cargo\.toml$'
+        pass_filenames: false
+
+      - id: test-no-std
+        name: test-no-std
+        entry: cargo test --workspace --no-default-features
+        language: system
+        description: Test no_std compilation and functionality
+        files: '^src/.*\.rs$|^Cargo\.toml$'
+        pass_filenames: false
+
+      - id: test-wasm
+        name: test-wasm
+        entry: cargo build --target wasm32-unknown-unknown --workspace --no-default-features
+        language: system
+        description: Test WASM compilation
+        files: '^src/.*\.rs$|^Cargo\.toml$'
+        pass_filenames: false
 
 # Configuration
 default_language_version:
@@ -90,5 +115,6 @@ exclude: |
     \.cargo/.*|
     target/.*|
     \.vscode/.*|
-    \.idea/.*
+    \.idea/.*|
+    Cargo\.lock
   )$

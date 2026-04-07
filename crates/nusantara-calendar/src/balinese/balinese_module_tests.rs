@@ -95,8 +95,7 @@ mod tests {
             let round_trip = BalineseDate::from_jdn(jdn).unwrap();
             assert_eq!(
                 original, round_trip,
-                "Round-trip failed for {}-{}-{}",
-                year, month, day
+                "Round-trip failed for {year}-{month}-{day}",
             );
         }
     }
@@ -105,7 +104,7 @@ mod tests {
     fn test_official_crate_access() {
         let date = BalineseDate::from_ymd(2026, 3, 19).unwrap();
         let official = date.as_official();
-        
+
         // Test that we can access official crate fields
         assert_eq!(official.gregorian_year, 2026);
         assert_eq!(official.gregorian_month, 3);
@@ -116,7 +115,7 @@ mod tests {
     fn test_from_official_conversion() {
         let official_date = OfficialBalineseDate::from_ymd(2026, 3, 19).unwrap();
         let wrapper_date = BalineseDate::from_official(official_date);
-        
+
         assert_eq!(wrapper_date.gregorian_year, 2026);
         assert_eq!(wrapper_date.gregorian_month, 3);
         assert_eq!(wrapper_date.gregorian_day, 19);
