@@ -34,7 +34,7 @@ impl Saptawara {
             Self::Saniscara => "Saniscara",
         }
     }
-    
+
     /// Get the urip (numerical value) of this day
     #[must_use]
     pub const fn urip(&self) -> u8 {
@@ -48,8 +48,17 @@ impl Saptawara {
             Self::Saniscara => 9,
         }
     }
-    
+
     /// Create from index (0-6, where 0 = Redite/Sunday)
+    ///
+    /// # Arguments
+    /// * `index` - Index in the 7-day Saptawara cycle
+    ///
+    /// # Returns
+    /// The corresponding Saptawara day
+    ///
+    /// # Panics
+    /// Panics if index >= 7
     #[must_use]
     pub fn from_index(index: usize) -> Self {
         match index {
@@ -63,7 +72,7 @@ impl Saptawara {
             _ => panic!("Saptawara index must be 0-6, got {}", index),
         }
     }
-    
+
     /// Get the index of this day
     #[must_use]
     pub const fn index(&self) -> usize {
@@ -107,7 +116,7 @@ impl Pancawara {
             Self::Umanis => "Umanis",
         }
     }
-    
+
     /// Get the urip (numerical value) of this day
     #[must_use]
     pub const fn urip(&self) -> u8 {
@@ -119,8 +128,17 @@ impl Pancawara {
             Self::Umanis => 5,
         }
     }
-    
+
     /// Create from index (0-4, where 0 = Paing)
+    ///
+    /// # Arguments
+    /// * `index` - Index in the 5-day Pancawara cycle
+    ///
+    /// # Returns
+    /// The corresponding Pancawara day
+    ///
+    /// # Panics
+    /// Panics if index >= 5
     #[must_use]
     pub fn from_index(index: usize) -> Self {
         match index {
@@ -132,7 +150,7 @@ impl Pancawara {
             _ => panic!("Pancawara index must be 0-4, got {}", index),
         }
     }
-    
+
     /// Get the index of this day
     #[must_use]
     pub const fn index(&self) -> usize {

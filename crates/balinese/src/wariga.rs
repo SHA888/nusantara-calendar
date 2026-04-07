@@ -123,36 +123,34 @@ pub enum DayTiming {
 /// # Returns
 /// Wariga calculation result with auspiciousness level and factors
 pub fn calculate_auspiciousness(jdn: i64, activity: &Activity) -> WarigaResult {
-    use calendar_core::CalendarDate;
     use crate::balinese_date::BalineseDate;
-    
+    use calendar_core::CalendarDate;
+
     // Create a BalineseDate to get the necessary components
     let Ok(date) = BalineseDate::from_jdn(jdn) else {
         return WarigaResult {
             auspiciousness: AuspiciousnessLevel::Neutral,
             factors: vec![WarigaFactor::Omen],
             timing: None,
-        }
+        };
     };
-    
+
     let mut factors = Vec::new();
     let mut score = 0; // Higher is more auspicious
-    
+
     // Saptawara influence
     match activity {
-        Activity::Marriage => {
-            match date.saptawara {
-                crate::wewaran::Saptawara::Buda | crate::wewaran::Saptawara::Sukra => {
-                    score += 3;
-                    factors.push(WarigaFactor::Saptawara);
-                }
-                crate::wewaran::Saptawara::Redite | crate::wewaran::Saptawara::Saniscara => {
-                    score -= 2;
-                    factors.push(WarigaFactor::Saptawara);
-                }
-                _ => {}
+        Activity::Marriage => match date.saptawara {
+            crate::wewaran::Saptawara::Buda | crate::wewaran::Saptawara::Sukra => {
+                score += 3;
+                factors.push(WarigaFactor::Saptawara);
             }
-        }
+            crate::wewaran::Saptawara::Redite | crate::wewaran::Saptawara::Saniscara => {
+                score -= 2;
+                factors.push(WarigaFactor::Saptawara);
+            }
+            _ => {}
+        },
         Activity::Ceremony => {
             if date.is_purnama {
                 score += 4;
@@ -167,16 +165,17 @@ pub fn calculate_auspiciousness(jdn: i64, activity: &Activity) -> WarigaResult {
         }
         _ => {}
     }
-    
+
     // Pancawara influence
     match (activity, date.pancawara) {
-        (Activity::Business, crate::wewaran::Pancawara::Kliwon) | (Activity::Agriculture, crate::wewaran::Pancawara::Umanis) => {
+        (Activity::Business, crate::wewaran::Pancawara::Kliwon)
+        | (Activity::Agriculture, crate::wewaran::Pancawara::Umanis) => {
             score += 2;
             factors.push(WarigaFactor::Pancawara);
         }
         _ => {}
     }
-    
+
     // Wuku influence
     match date.wuku {
         crate::pawukon::Wuku::Sinta | crate::pawukon::Wuku::Landep => {
@@ -189,13 +188,13 @@ pub fn calculate_auspiciousness(jdn: i64, activity: &Activity) -> WarigaResult {
         }
         _ => {}
     }
-    
+
     // Nampih month influence
     if date.is_nampih {
         score -= 1;
         factors.push(WarigaFactor::Nampih);
     }
-    
+
     // Convert score to auspiciousness level
     let auspiciousness = match score {
         score if score >= 4 => AuspiciousnessLevel::VeryAuspicious,
@@ -204,7 +203,7 @@ pub fn calculate_auspiciousness(jdn: i64, activity: &Activity) -> WarigaResult {
         score if score >= -2 => AuspiciousnessLevel::Inauspicious,
         _ => AuspiciousnessLevel::VeryInauspicious,
     };
-    
+
     // Determine optimal timing
     let timing = match activity {
         Activity::Ceremony => Some(DayTiming::Morning),
@@ -212,7 +211,7 @@ pub fn calculate_auspiciousness(jdn: i64, activity: &Activity) -> WarigaResult {
         Activity::Building => Some(DayTiming::EarlyMorning),
         _ => Some(DayTiming::AnyTime),
     };
-    
+
     WarigaResult {
         auspiciousness,
         factors,

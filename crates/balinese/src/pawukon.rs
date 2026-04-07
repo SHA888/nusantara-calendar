@@ -109,7 +109,7 @@ impl Wuku {
             Self::Watugunung => "Watugunung",
         }
     }
-    
+
     /// Get the urip (numerical value) of this Wuku
     ///
     /// Each Wuku has a traditional urip value used in calculations
@@ -151,7 +151,7 @@ impl Wuku {
             Self::Watugunung => 4,
         }
     }
-    
+
     /// Create a Wuku from its index (0-29)
     ///
     /// # Arguments
@@ -198,7 +198,7 @@ impl Wuku {
             _ => panic!("Wuku index must be 0-29, got {}", index),
         }
     }
-    
+
     /// Get the index of this Wuku in the 30 Wuku cycle
     ///
     /// # Returns

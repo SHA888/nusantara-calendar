@@ -55,10 +55,10 @@ impl Sasih {
             Self::Sada => "Sada",
         }
     }
-    
+
     /// Get the number of days in this Sasih
     ///
-    /// According to Wikipedia, each Sasih has 30 days: 15 penanggal + 15 panglong
+    /// Each Sasih has 30 days: 15 penanggal + 15 panglong per official balinese-calendar crate
     ///
     /// # Returns
     /// Number of days (always 30)
@@ -66,7 +66,7 @@ impl Sasih {
     pub const fn days(&self) -> u8 {
         30
     }
-    
+
     /// Create a Sasih from its index (0-11)
     ///
     /// # Arguments
@@ -95,7 +95,7 @@ impl Sasih {
             _ => panic!("Sasih index must be 0-11, got {}", index),
         }
     }
-    
+
     /// Get the index of this Sasih in the 12 Sasih cycle
     ///
     /// # Returns
@@ -117,7 +117,7 @@ impl Sasih {
             Self::Sada => 11,
         }
     }
-    
+
     /// Check if this Sasih can have a Nampih (intercalary month)
     ///
     /// Nampih months are added to keep the lunar calendar aligned with solar years
@@ -128,25 +128,25 @@ impl Sasih {
         // Traditionally, only certain Sasih can have Nampih months
         matches!(self, Self::Kadasa | Self::Desta)
     }
-    
+
     /// Get the approximate Gregorian months this Sasih corresponds to
     ///
     /// # Returns
     /// Tuple of (starting_month, ending_month) as Gregorian month numbers
     pub fn approximate_gregorian_months(&self) -> (u8, u8) {
         match self {
-            Self::Kasa => (6, 7),   // June-July
-            Self::Karo => (7, 8),   // July-August
-            Self::Katiga => (8, 9), // August-September
-            Self::Kapat => (9, 10), // September-October
+            Self::Kasa => (6, 7),     // June-July
+            Self::Karo => (7, 8),     // July-August
+            Self::Katiga => (8, 9),   // August-September
+            Self::Kapat => (9, 10),   // September-October
             Self::Kalima => (10, 11), // October-November
-            Self::Kanem => (11, 12), // November-December
-            Self::Kapitu => (12, 1), // December-January
-            Self::Kawolu => (1, 2), // January-February
-            Self::Kasanga => (2, 3), // February-March
-            Self::Kadasa => (3, 4), // March-April
-            Self::Desta => (4, 5), // April-May
-            Self::Sada => (5, 6), // May-June
+            Self::Kanem => (11, 12),  // November-December
+            Self::Kapitu => (12, 1),  // December-January
+            Self::Kawolu => (1, 2),   // January-February
+            Self::Kasanga => (2, 3),  // February-March
+            Self::Kadasa => (3, 4),   // March-April
+            Self::Desta => (4, 5),    // April-May
+            Self::Sada => (5, 6),     // May-June
         }
     }
 }

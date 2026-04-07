@@ -37,7 +37,9 @@ impl From<BalineseCalendarError> for CalendarError {
     fn from(err: BalineseCalendarError) -> Self {
         match err {
             BalineseCalendarError::OutOfRange(msg) => CalendarError::OutOfRange(msg),
-            BalineseCalendarError::InvalidGregorianDate(msg) => CalendarError::InvalidParameters(msg),
+            BalineseCalendarError::InvalidGregorianDate(msg) => {
+                CalendarError::InvalidParameters(msg)
+            }
             BalineseCalendarError::InvalidSakaYear(msg) => CalendarError::InvalidParameters(msg),
             BalineseCalendarError::AstronomicalError(msg) => CalendarError::ArithmeticError(msg),
             BalineseCalendarError::NotImplemented(msg) => CalendarError::NotImplemented(msg),
