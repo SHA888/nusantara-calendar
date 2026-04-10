@@ -105,22 +105,17 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Scope:** Workspace refactor to 2-crate structure; balinese module wrapping external crate.
 > **Tag:** `nusantara-calendar-v0.1.0`
 
-### 1.1 `nusantara-calendar` Architecture Refactor
+### `nusantara-calendar` Architecture Refactor
 
-#### Design
 - [x] `[arch]` Confirm single-crate structure with feature-gated modules (not separate crates per calendar)
 - [x] `[arch]` Implement feature flags for each calendar module in `Cargo.toml`
 - [x] `[arch]` Keep `calendar-core` as separate published dependency
 - [x] `[arch]` Plan wrapper approach for external crates (balinese-calendar)
-
-#### Implementation
 - [x] `[impl]` Create `crates/nusantara-calendar/Cargo.toml` with all feature flags
 - [x] `[impl]` Create `src/lib.rs` with feature-gated `mod` declarations and `calendar-core` re-exports
 - [x] `[impl]` Create stub `mod.rs` files for all calendar modules (jawa through dewasa_engine)
 - [x] `[impl]` Implement balinese wrapper around external `balinese-calendar` v0.2.0
 - [x] `[impl]` Implement `calendar-core` traits on wrapped balinese types
-
-#### Testing
 - [x] `[test]` Verify balinese wrapper trait implementations
 - [x] `[test]` Round-trip conversions with official crate
 - [x] `[test]` Feature flag compilation tests
@@ -128,22 +123,17 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ---
 
-### 1.2 `balinese` Module Implementation
+### `balinese` module
 
-#### Design
 - [x] `[arch]` Audit official `balinese-calendar` v0.2.0 crate API
 - [x] `[arch]` Design wrapper that re-exports official types via `pub use`
 - [x] `[arch]` Plan trait delegation to official crate methods
-
-#### Implementation
 - [x] `[impl]` Implement `src/balinese/mod.rs` wrapper module
 - [x] `[impl]` Implement `CalendarDate` for `BalineseDate` newtype
 - [x] `[impl]` Implement `CalendarMetadata` for `BalineseDate`
 - [x] `[impl]` Implement `HasAuspiciousness` for `BalineseDate`
 - [x] `[impl]` Add `from_ymd`, `as_official`, `from_official` conversion methods
 - [x] `[impl]` Implement `Deref<Target = OfficialBalineseDate>` and `From` conversion
-
-#### Testing
 - [x] `[test]` Verify all three trait implementations work correctly
 - [x] `[test]` Test round-trip conversions via JDN
 - [x] `[test]` Test official crate access through wrapper
@@ -156,16 +146,13 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Scope:** Three core supra-ethnic calendar modules implemented in `nusantara-calendar`.
 > **Tag:** `nusantara-calendar-v0.2.0`
 
-### 2.1 `jawa` module
+### `jawa` module
 
-#### Design
-- [ ] `[arch]` Confirm no Rust Javanese crate exists on crates.io (last checked March 2026)
+- [ ] `[arch]` Confirm independent implementation — `jawa` module has no external calendar dependency; all Javanese arithmetic implemented directly from cited sources
 - [ ] `[arch]` Map all required cycles to data types:
       Wetonan → `(SaptawaraPos, PasaranPos)`, Pawukon → `WukuPos`, Windu → `WinduYear` enum,
       Kurup → `KurupRecord`, Pranata Masa → `PranataMasaPos`
 - [ ] `[arch]` Specify supported year range: AJ 1555–2474 (Gregorian 1633–2169, spans 2 kurups)
-
-#### Implementation
 - [ ] `[impl]` Implement `src/jawa/mod.rs` within `nusantara-calendar`
 - [ ] `[impl]` Define `pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690`
       (cite: Beauducel & Karjanto 2020, arXiv:2012.10064)
@@ -185,8 +172,6 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement `CalendarDate` for `JavaneseDay`
 - [ ] `[impl]` Implement `CalendarMetadata` for `JavaneseDay`
 - [ ] `[impl]` Gate `no_std` correctly within module
-
-#### Testing
 - [ ] `[test]` Known anchor: JDN 2317690 → 1 Sura 1555 AJ, Jumat Legi, wuku Sinta pos 1
 - [ ] `[test]` Known anchor: 1945-08-17 (Proklamasi) → Jumat Legi (verify historical record)
 - [ ] `[test]` Kurup boundary: 1936-03-24 → Selasa Pon, Alip year
@@ -196,17 +181,14 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ---
 
-### 2.3 `hijriyah` module
+### `hijriyah` module
 
 > Detailed execution plan tracked at `~/.windsurf/plans/hijriyah-implementation-a99a87.md`.
 
-#### Design
 - [ ] `[arch]` Confirm GPL-3.0-only exclusion (misykat) and record Option A decision in `src/hijriyah/DECISION.md`
 - [ ] `[arch]` Define module structure (`src/hijriyah/mod.rs`, `arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`)
 - [ ] `[arch]` Specify arithmetic sources (Dershowitz-Reingold Ch. 6, Meeus Ch. 9) and cite in rustdoc
 - [ ] `[arch]` Declare `tabular_date()` vs `indonesian_government_date()` behavior and supported Hijri range (≥1–1600 AH)
-
-#### Implementation
 - [ ] `[impl]` Create module skeleton in `src/hijriyah/`
 - [ ] `[impl]` Implement `hijri_to_jdn` and `jdn_to_hijri` per D-R Eq. 6.2–6.3 (tabular, Thursday epoch, JDN 1948439 start)
 - [ ] `[impl]` Implement leap-year logic (years 2,5,7,10,13,16,18,21,24,26,29 in each 30-year cycle) and expose `HijriDay::is_leap_year`
@@ -216,8 +198,6 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Provide `tabular_date()` and stub `indonesian_government_date()` with `stub!()` message referencing Kemenag data need
 - [ ] `[impl]` Document algorithm choice; write exclusion rationale in `DECISION.md`; cite references in `SOURCES.md`
 - [ ] `[impl]` Implement `CalendarDate` + `CalendarMetadata` traits for `HijriDay`
-
-#### Testing
 - [ ] `[test]` Anchor JDNs: 1 Muharram 1 AH (1948439), 1043 AH (2317690), 1355 AH (2428252), 1446 AH (2460494)
 - [ ] `[test]` Holiday equality: ensure `idul_fitri_jdn(y) == hijri_to_jdn(y, 10, 1)` etc.
 - [ ] `[test]` Pasaran check: `HijriDay::from_jdn(2317690)?.pasaran == Pasaran::Legi` (Jumat Legi)
@@ -226,15 +206,12 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ---
 
-### 2.4 `chinese_nusantara` module
+### `chinese_nusantara` module
 
-#### Design
 - [ ] `[arch]` Audit `nongli` v0.4.1 API: `ChineseDate`, `SolarTerm`; confirm no JDN interface
 - [ ] `[arch]` Design bridge: `gregorian_to_jdn` → `nongli::ChineseDate::from_gregorian(NaiveDate)`
       Note: bridge via `jdn_to_gregorian` → `NaiveDate::from_ymd_opt`
 - [ ] `[arch]` Document that this module is `std`-only in `Cargo.toml` and rustdoc
-
-#### Implementation
 - [ ] `[impl]` Create module skeleton in `src/chinese_nusantara/`
 - [ ] `[impl]` Add `nongli = "0.4.1"` to `nusantara-calendar` Cargo.toml (already present)
 - [ ] `[impl]` Implement `ChineseNusantaraDay` wrapping `nongli::ChineseDate`
@@ -246,14 +223,12 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement Weton Tionghoa (Pasaran intersection; same formula as hijriyah)
 - [ ] `[impl]` Document Singkawang vs Solo/Semarang Cap Go Meh variant in rustdoc
 - [ ] `[impl]` Implement `CalendarDate`, `CalendarMetadata`
-
-#### Testing
 - [ ] `[test]` Imlek 2026: verify Chinese New Year 1st day maps to 2026-01-29 Gregorian
 - [ ] `[test]` Cap Go Meh 2026: verify 15th day 1st month maps to 2026-02-12 Gregorian
 - [ ] `[test]` Shio: verify 2026 is year of the Horse (Kuda)
 - [ ] `[test]` Round-trip: 200 dates (nongli range: 1900–2100)
 
-### v0.2.0 Release
+### Release
 - [ ] `[rel]` Integration test: balinese + jawa + hijriyah + chinese_nusantara all compile together
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.2.0]` section
 - [ ] `[rel]` Dry-run: `cargo publish --dry-run -p nusantara-calendar --features all-calendars`
@@ -266,13 +241,12 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Scope:** Batak Porhalaan with Toba, Karo, Simalungun variants.
 > **Tag:** `nusantara-calendar-v0.3.0`
 
-### Design
+### `batak` module
+
 - [ ] `[arch]` Read and summarize: "A Lunar-Star Calendar", preprints.org/manuscript/202404.0235 (2024)
 - [ ] `[arch]` Map Toba Porhalaan 12-month system to data types; identify intercalation rule
 - [ ] `[arch]` Specify `tabular` behavior (default, no_std) vs `astronomical` feature (runtime calc)
 - [ ] `[arch]` Document sub-group variant divergences: Karo, Simalungun vs Toba core
-
-### Implementation
 - [ ] `[impl]` Implement `src/batak/mod.rs` within `nusantara-calendar`
 - [ ] `[impl]` Implement `const` Toba month names array (12 + 1 intercalary: Ihuthon)
 - [ ] `[impl]` Implement `const` Hara day-name cycle (30 entries)
@@ -284,8 +258,6 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Stub Simalungun variant month names with citation
 - [ ] `[impl]` Stub Datu auspiciousness system with citation (Schreiner 1972)
 - [ ] `[impl]` Implement `CalendarDate` (calls `from_jdn_tabular`), `CalendarMetadata`
-
-### Testing
 - [ ] `[test]` Tabular: verify known Toba festival dates against preprint data
 - [ ] `[test]` Round-trip: 200 JDNs, tabular mode
 - [ ] `[test]` Astronomical: verify Orion first-rise JDN at lat=2.6°N for 2025 matches
@@ -302,7 +274,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 > **Tag:** `nusantara-calendar-v0.4.0`
 
-### 4.1 `sunda` module
+### `sunda` module
 
 - [ ] `[arch]` Research Kala Sunda Saka epoch and relationship to Balinese Saka
 - [ ] `[arch]` Document Pranatamangsa Sunda solar epoch difference vs Javanese
@@ -314,7 +286,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Pranatamangsa Sunda: verify season 1 (Kasa) start date aligns with cited source
 - [ ] `[test]` Round-trip: 200 JDNs
 
-### 4.2 `tengger` module
+### `tengger` module
 
 - [ ] `[arch]` Read Hefner (1985) for Kasada computation rules; identify Saka base
 - [ ] `[arch]` Confirm Unan-unan 5-year cycle is distinct from Javanese Windu
@@ -327,7 +299,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
       (cross-reference with Bromo ceremony news sources)
 - [ ] `[test]` Round-trip: 200 JDNs
 
-### v0.4.0 Release
+### Release
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.4.0]`
 - [ ] `[rel]` Tag and publish `nusantara-calendar-v0.4.0`
 
@@ -338,7 +310,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Scope:** Observation-dependent modules; partial stubs accepted.
 > **Tag:** `nusantara-calendar-v0.5.0`
 
-### 5.1 `bugis` module
+### `bugis` module
 
 - [ ] `[arch]` Read Pelras, *The Bugis* (1996) — document calendar sections
 - [ ] `[impl]` Implement `src/bugis/mod.rs` — 12-month Bugis lunar calendar (Islamic-influenced)
@@ -350,7 +322,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Known anchor: verify Idul Fitri 1446 AH Bugis date alignment with Hijriyah
 - [ ] `[test]` `--no-default-features` build
 
-### 5.2 `sasak` module
+### `sasak` module
 
 - [ ] `[arch]` Read Taufiq et al. — document Rowot new year and Bau Nyale timing
 - [ ] `[impl]` Implement `src/sasak/mod.rs` — 12-month Sasak lunar calendar with Sasak-language month names
@@ -361,7 +333,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Bau Nyale 2025/2026: verify Gregorian date against published festival announcements
 - [ ] `[test]` Round-trip: 150 JDNs
 
-### 5.3 `dayak` module
+### `dayak` module
 
 - [ ] `[arch]` Read Schärer (1963) *Ngaju Religion* — document Kaharingan calendar phases
 - [ ] `[impl]` Implement `src/dayak/mod.rs` — 12-month Kaharingan agricultural cycle (Pleiades-keyed)
@@ -371,7 +343,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement `CalendarDate`, `CalendarMetadata`
 - [ ] `[test]` Month boundary: verify Dayak new year approximate JDN vs Pleiades season
 
-### v0.5.0 Release
+### Release
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.5.0]`
 - [ ] `[rel]` Tag and publish `nusantara-calendar-v0.5.0`
 
@@ -381,7 +353,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 > **Tag:** `nusantara-calendar-v0.6.0`
 
-### 6.1 `toraja` module
+### `toraja` module
 
 - [ ] `[arch]` Read Nooy-Palm (1979) *The Sa'dan Toraja* Vol. 1 — extract month names and
       Rambu Solo' / Rambu Tuka' timing rules
@@ -392,7 +364,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement `CalendarDate`, `CalendarMetadata`
 - [ ] `[test]` Ma'nene' 2024/2025: verify approximate date against documented ceremony records
 
-### 6.2 `minangkabau` module
+### `minangkabau` module
 
 - [ ] `[arch]` Read Kato (1982) *Matriliny and Migration* — document adat calendar obligations
 - [ ] `[impl]` Implement `src/minangkabau/mod.rs` — Hijriyah-overlay base (reuse `jdn_to_hijri` arithmetic locally; do not import `hijriyah` module)
@@ -403,7 +375,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement `CalendarDate`, `CalendarMetadata`
 - [ ] `[test]` Verify Turun ka Sawah approximate season against Padang agricultural calendar
 
-### v0.6.0 Release
+### Release
 - [ ] `[rel]` Update `CHANGELOG.md` — `## [0.6.0]`
 - [ ] `[rel]` Tag and publish `nusantara-calendar-v0.6.0`
 
@@ -414,15 +386,14 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 > **Scope:** Cross-calendar auspiciousness correlator. Depends on all prior modules.
 > **Tag:** `nusantara-calendar-v0.7.0`
 
-### Design
+### `dewasa_engine` module
+
 - [ ] `[arch]` Finalize `NusantaraDay` struct field list; confirm `Option<_>` for all ethnic modules
 - [ ] `[arch]` Define `CrossCalendarVerdict` consensus algorithm (most cautious non-Unknown wins)
 - [ ] `[arch]` Define `CalendarConflict` struct: which modules, what levels, what dates
 - [ ] `[arch]` Decide feature flags for ethnic modules in `dewasa_engine`:
       `features = ["batak", "sunda", "tengger", "bugis", "sasak", "dayak", "toraja", "minangkabau"]`
       Default: only the 4 core modules always included
-
-### Implementation
 - [ ] `[impl]` Implement `src/dewasa_engine/mod.rs` — `std`-only declaration
 - [ ] `[impl]` Implement `NusantaraDay::from_gregorian(y, m, d)` calling all enabled modules
 - [ ] `[impl]` Implement `NusantaraDay::from_jdn(jdn: i64)` as primary constructor
@@ -430,8 +401,6 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[impl]` Implement conflict detection: opposite sides of Neutral across 2+ calendars
 - [ ] `[impl]` Implement `overall` consensus: most cautious non-Unknown level
 - [ ] `[impl]` Add `serde` feature for full `NusantaraDay` serialization (JSON-ready for API)
-
-### Testing
 - [ ] `[test]` Smoke test: `NusantaraDay::from_gregorian(2026, 3, 21)` returns valid struct
 - [ ] `[test]` Conflict detection: construct a day with known opposing auspiciousness values
 - [ ] `[test]` Serialization: `serde_json::to_string(&day)` round-trips correctly
