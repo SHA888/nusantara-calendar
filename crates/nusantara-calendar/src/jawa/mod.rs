@@ -23,6 +23,7 @@
 //! | Pranata Masa | 12 seasons | `PranataMasaPos` (u8, 0–11) |
 
 use crate::{CalendarDate, CalendarError, CalendarMetadata, JDN};
+use calendar_core::stub;
 
 // ============================================================================
 // EPOCH CONSTANTS
@@ -276,6 +277,52 @@ pub const WINDU_LENGTH_YEARS: u8 = 8;
 
 /// Days in a complete Windu cycle (4×354 + 3×355 + 354 = 2835, or 8×354 + 3 = 2835).
 pub const WINDU_LENGTH_DAYS: u16 = 2835;
+
+// ============================================================================
+// SUPRA-WINDU GROUPS (STUB)
+// ============================================================================
+
+/// Supra-windu group names within the 120-year Kurup hierarchy.
+///
+/// **STUB:** These are 4-group names that categorize the 15 windus within a Kurup.
+/// The full algorithm for determining the current supra-windu group from AJ year
+/// requires the complete Kurup table from Danudji (2006) which is not yet implemented.
+///
+/// # Sources
+/// - H. Danudji, *Penanggalan Jawa 120 Tahun Kurup Asapon*, Dahara Prize 2006.
+///   ISBN 979-501-454-4. Print-only; algorithm not digitally available.
+/// - Wikipedia "Javanese calendar" confirms existence but lacks computational detail.
+///
+/// Known supra-windu groups: Adi, Kuntara, Sengara, Sancaya.
+/// "Sancaya" is confirmed as a group name, NOT a windu year name.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SupraWinduGroup {
+    /// First supra-windu group (windus 1-4 of a Kurup)
+    Adi,
+    /// Second supra-windu group (windus 5-8 of a Kurup)
+    Kuntara,
+    /// Third supra-windu group (windus 9-12 of a Kurup)
+    Sengara,
+    /// Fourth supra-windu group (windus 13-15 of a Kurup)
+    ///
+    /// **Note:** "Sancaya" is a supra-windu group, not a windu year.
+    Sancaya,
+}
+
+/// Compute supra-windu group from AJ year.
+///
+/// # Sources
+/// - H. Danudji (2006), *Penanggalan Jawa 120 Tahun Kurup Asapon*.
+///   Complete algorithm requires full Kurup table not yet transcribed.
+///
+/// **STUB:** Returns `NotImplemented` until full Kurup table is available.
+///
+/// # Errors
+/// Returns `CalendarError::NotImplemented` for all inputs, as the algorithm
+/// requires the complete Kurup table from Danudji (2006) which is not yet available.
+pub fn supra_windu_from_aj(_aj: u32) -> Result<SupraWinduGroup, CalendarError> {
+    stub!("Supra-windu group: requires Danudji (2006) Kurup table. Not yet implemented.")
+}
 
 // ============================================================================
 // KURUP (120-YEAR CYCLE)

@@ -176,12 +176,10 @@ Each release is a Git tag on `main`. All items are checklist tasks.
       *Formula: `(jdn - KASA_REF).rem_euclid(365)` → lookup in `PRANATA_MASA_SOLAR_OFFSETS`*
 - [x] `[impl]` Implement `KurupRecord` with `KURUP_ASAPON_START_JDN` and `KURUP_ASAPON_END_JDN`
       annotated with source-tier doc comments (Danudji 2006 primary, cross-validated)
-- [ ] `[impl]` Stub supra-windu group names with citation (Danudji 2006)
-- [ ] `[doc]` Add `jawa` entry to workspace `SOURCES.md` with verification-tier table:
-      Karjanto & Beauducel (2020) ✅ primary + digitally verifiable;
-      Dershowitz & Reingold (4th ed.) ✅ primary + widely cited;
-      Danudji (2006) ⚠️ primary, print-only, triangulation required;
-      Wikipedia + `beaudu/weton` ℹ️ cross-check only
+- [x] `[impl]` Stub supra-windu group names with citation (Danudji 2006)
+      *Added `SupraWinduGroup` enum with Adi, Kuntara, Sengara, Sancaya; stub function documented*
+- [x] `[doc]` Add `jawa` entry to workspace `SOURCES.md` with verification-tier table
+      *Created SOURCES.md with verification legend, jawa module entry, algorithm-to-source mapping, and confidence assessment*
 - [x] `[impl]` Implement `CalendarDate` for `JavaneseDay` (stub — returns NotImplemented for unconverted dates)
 - [x] `[impl]` Implement `CalendarMetadata` for `JavaneseDay` (done)
 - [ ] `[impl]` Gate `no_std` correctly within module
