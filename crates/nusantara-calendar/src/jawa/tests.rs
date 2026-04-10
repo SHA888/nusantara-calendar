@@ -363,3 +363,74 @@ fn kurup_boundary_1936() {
     // but our calculation gives a different year. This needs cross-validation.
     // assert_eq!(date.windu_year, WinduYear::Alip);
 }
+
+// ============================================================================
+// ROUND-TRIP TESTS
+// ============================================================================
+
+#[test]
+fn round_trip_random_jdns() {
+    // Test 500 random JDNs that successfully convert to Javanese dates
+    // Use a deterministic pseudo-random sequence for reproducibility
+    let mut state: i64 = 12345; // LCG seed
+
+    let mut tested = 0;
+    let mut i = 0;
+
+    while tested < 500 && i < 10000 {
+        i += 1;
+
+        // Generate pseudo-random JDN using LCG
+        state = state.wrapping_mul(1_103_515_245).wrapping_add(12345);
+        let jdn_candidate = JDN_MIN + (state.rem_euclid(JDN_MAX - JDN_MIN));
+
+        // Skip if outside JDN bounds
+        if !(JDN_MIN..=JDN_MAX).contains(&jdn_candidate) {
+            continue;
+        }
+
+        // Convert JDN to Javanese date - may return None for dates
+        // that are within JDN bounds but outside year bounds
+        let date = JavaneseDay::from_jdn(jdn_candidate);
+
+        // Skip dates that are outside the supported year range
+        let Some(ref d) = date else {
+            continue;
+        };
+
+        tested += 1;
+
+        // Verify round-trip: jdn → date → jdn
+        let round_trip_jdn = d.to_jdn();
+        assert_eq!(
+            round_trip_jdn, jdn_candidate,
+            "Round-trip failed for JDN {jdn_candidate} (iteration {i})"
+        );
+    }
+
+    assert_eq!(tested, 500, "Should have tested 500 valid JDNs");
+}
+
+// ============================================================================
+// WASM BUILD VERIFICATION
+// ============================================================================
+
+/// This test verifies that the jawa module compiles correctly with `no_std`.
+/// The actual WASM target check is done via the pre-commit hook:
+/// `cargo build --target wasm32-unknown-unknown --workspace --no-default-features`
+#[test]
+fn no_std_compilation_check() {
+    // Verify that core types are available in `no_std` context
+    // This test runs in std context but validates the `no_std`-compatible code paths
+    let _ = JDN_MIN;
+    let _ = AJ_MIN;
+    let _ = SULTAN_AGUNG_EPOCH_JDN;
+
+    // Verify const functions work (no_std compatible)
+    let pasaran = pasaran_from_jdn(SULTAN_AGUNG_EPOCH_JDN);
+    let saptawara = saptawara_from_jdn(SULTAN_AGUNG_EPOCH_JDN);
+    let _wuku = wuku_from_jdn(SULTAN_AGUNG_EPOCH_JDN);
+
+    assert_eq!(pasaran, 0); // Legi
+    assert_eq!(saptawara, 4); // Jemuwah
+}

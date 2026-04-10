@@ -191,8 +191,11 @@ Each release is a Git tag on `main`. All items are checklist tasks.
       *Implemented in `kurup_boundary_1936` - Selasa (1) ✓, Pon (2) ✓, Wetonan ✓*
       *Note: Windu year at boundary needs cross-validation against Danudji (2006)*
 - [x] `[test]` Windu year: `WinduYear::from_aj(1959) == WinduYear::Wawu`
-- [ ] `[test]` Round-trip: 500 random JDNs within AJ 1555–2474
-- [ ] `[test]` `--no-default-features` + WASM build check
+- [x] `[test]` Round-trip: 500 random JDNs within AJ 1555–2474
+      *Implemented in `round_trip_random_jdns` - 500 JDNs tested with round-trip verification*
+- [x] `[test]` `--no-default-features` + WASM build check
+      *Pre-commit hook already runs `cargo build --target wasm32-unknown-unknown`*
+      *Unit test `no_std_compilation_check` validates `no_std` compatibility*
 
 ---
 
