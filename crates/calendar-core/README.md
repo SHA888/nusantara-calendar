@@ -3,7 +3,7 @@
 ![crates.io](https://img.shields.io/crates/v/calendar-core.svg)
 ![docs.rs](https://docs.rs/calendar-core/badge.svg)
 ![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)
-![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)
+![MSRV: 1.94](https://img.shields.io/badge/MSRV-1.94-orange.svg)
 
 Core traits and utilities for nusantara-calendar workspace, providing foundational types and interfaces for Indonesian calendar systems.
 

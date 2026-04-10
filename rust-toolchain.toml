@@ -1,3 +1,3 @@
 [toolchain]
-channel = "stable"
-msrv = "1.80"
+channel = "1.94"
+msrv = "1.94"

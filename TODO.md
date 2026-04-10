@@ -20,7 +20,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 ### 0.1 Repository Setup
 - [x] `[ci]` Initialize Git repository with `main` as default branch
 - [x] `[ci]` Add `.gitignore` (Rust standard: `target/`, `Cargo.lock` for libraries)
-- [x] `[ci]` Add `rust-toolchain.toml` pinning stable channel, MSRV 1.80
+- [x] `[ci]` Add `rust-toolchain.toml` pinning stable channel, MSRV 1.94
 - [x] `[ci]` Add `.cargo/config.toml` with `[alias]` for common workspace commands
 - [x] `[doc]` Add `LICENSE-MIT` and `LICENSE-APACHE` files at workspace root
 - [x] `[doc]` Add `CONTRIBUTING.md` with the citation-required policy
@@ -39,7 +39,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [x] `[impl]` Add `[workspace.metadata.release]` for `cargo-release` config
 
 ### 0.3 CI Pipeline (GitHub Actions)
-- [x] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.80
+- [x] `[ci]` Add `ci.yml`: `cargo check`, `cargo clippy`, `cargo test` on stable + MSRV 1.94
 - [x] `[ci]` Add WASM compilation check job:
   `cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features`
 - [x] `[ci]` Add `cargo test --no-default-features` job (verifies `no_std` compilability)
@@ -469,7 +469,7 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [ ] `[test]` Add property-based tests (via `proptest`) for all `CalendarDate::from_jdn` impls
 - [ ] `[test]` Add benchmark suite (`criterion`) for JDN pivot functions
 - [ ] `[test]` Full WASM build matrix: all `no_std` modules on `wasm32-unknown-unknown`
-- [ ] `[test]` MSRV check: `cargo +1.80 test --workspace`
+- [ ] `[test]` MSRV check: `cargo +1.94 test --workspace`
 
 ### CI Additions for v1.0
 - [ ] `[ci]` Add `cargo semver-checks` to CI (detects unintentional breaking changes)

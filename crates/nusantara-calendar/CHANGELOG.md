@@ -158,7 +158,7 @@ The Balinese calendar implementation serves as the reference for how other calen
 
 ### Compatibility
 
-- **Minimum Rust Version**: 1.80
+- **Minimum Rust Version**: 1.94
 - **Platform Support**: Linux, macOS, Windows, WASM, embedded systems
 - **Dependency Requirements**: See Cargo.toml for specific versions
 - **License**: Apache-2.0 OR MIT

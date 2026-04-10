@@ -15,8 +15,8 @@
 
 // Re-export the official balinese-calendar types
 pub use balinese_calendar::{
-    pawukon, sasih, wariga, wewaran, BalineseDate as OfficialBalineseDate, BalineseDateError,
-    Pancawara, Saptawara, Sasih, Wuku,
+    BalineseDate as OfficialBalineseDate, BalineseDateError, Pancawara, Saptawara, Sasih, Wuku,
+    pawukon, sasih, wariga, wewaran,
 };
 
 use crate::{CalendarDate, CalendarError, CalendarMetadata, HasAuspiciousness, JDN};

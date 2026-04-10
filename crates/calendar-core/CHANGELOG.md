@@ -91,7 +91,7 @@ The implementation follows established astronomical algorithms and cultural rese
 
 ### Compatibility
 
-- **Minimum Rust Version**: 1.80
+- **Minimum Rust Version**: 1.94
 - **Platform Support**: Linux, macOS, Windows, WASM, embedded systems
 - **Dependency Requirements**: `thiserror` v2.0+, optional `serde` v1.0+
 - **License**: Apache-2.0 OR MIT

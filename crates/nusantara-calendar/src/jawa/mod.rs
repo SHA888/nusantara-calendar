@@ -253,11 +253,7 @@ impl WinduYear {
     /// Returns the number of days in this windu year.
     #[must_use]
     pub const fn days_in_year(&self) -> u16 {
-        if self.is_leap() {
-            355
-        } else {
-            354
-        }
+        if self.is_leap() { 355 } else { 354 }
     }
 
     /// Convert Anno Javanico year to Windu year.

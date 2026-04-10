@@ -61,13 +61,13 @@ jobs:
 
   # Test on MSRV
   test-msrv:
-    name: Test (MSRV 1.80)
+    name: Test (MSRV 1.94)
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
 
     - name: Install Rust MSRV
-      uses: dtolnay/rust-toolchain@1.94.0
+      uses: dtolnay/rust-toolchain@1.94
       with:
         components: rustfmt
 

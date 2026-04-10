@@ -476,7 +476,7 @@ pub struct CrossCalendarVerdict {
 | `dewasa_engine` | ❌ | ✅ | `HashMap` aggregation |
 
 Additional constraints applying to all modules:
-- Rust edition 2021, MSRV 1.80
+- Rust edition 2024, MSRV 1.94
 - All static lookup tables as `const` — no runtime heap allocation for data
 - WASM32 target must compile for all `no_std` modules
 - Feature flags: `serde`, `wasm`, `astronomical` (for observation-dependent modules)

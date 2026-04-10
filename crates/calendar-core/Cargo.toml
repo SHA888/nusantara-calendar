@@ -1,8 +1,8 @@
 [package]
 name = "calendar-core"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.80"
+edition = "2024"
+rust-version = "1.94"
 license = "MIT OR Apache-2.0"
 description = "Core traits and utilities for nusantara-calendar workspace"
 repository = "https://github.com/SHA888/nusantara-calendar"

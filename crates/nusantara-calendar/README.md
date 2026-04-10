@@ -3,7 +3,7 @@
 ![crates.io](https://img.shields.io/crates/v/nusantara-calendar.svg)
 ![docs.rs](https://docs.rs/nusantara-calendar/badge.svg)
 ![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)
-![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)
+![MSRV: 1.94](https://img.shields.io/badge/MSRV-1.94-orange.svg)
 
 A comprehensive Rust crate covering every traditional calendar system with a documented algorithmic basis across the Indonesian archipelago. This crate provides unified `calendar-core` trait integration for multiple Indonesian/Nusantara calendar systems.
 
