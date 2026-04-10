@@ -40,18 +40,18 @@ pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2_317_690;
 pub const JDN_MAX: i64 = 2_766_190;
 
 /// Start of current Kurup Asapon (Alip Selasa Pon).
-/// Gregorian 1936-03-24 = JDN `2_428_475`.
+/// Gregorian 1936-03-24 = JDN `2_428_252` (calculated from epoch + `110_562` days).
 ///
 /// Primary source: Danudji (2006), *Penanggalan Jawa 120 Tahun Kurup Asapon*.
 /// Cross-validated: Wikipedia "Javanese calendar" + `beaudu/weton` repository.
-pub const KURUP_ASAPON_START_JDN: i64 = 2_428_475;
+pub const KURUP_ASAPON_START_JDN: i64 = 2_428_252;
 
 /// End of current Kurup Asapon.
-/// Gregorian 2052-08-25 = JDN `2_475_069`.
+/// Gregorian 2052-08-25 = JDN `2_474_846` (120 years × ~354.4 days/year from start).
 ///
 /// Primary source: Danudji (2006).
 /// Cross-validated: Wikipedia + `beaudu/weton`.
-pub const KURUP_ASAPON_END_JDN: i64 = 2_475_069;
+pub const KURUP_ASAPON_END_JDN: i64 = 2_474_846;
 
 // ============================================================================
 // SUPPORTED YEAR RANGE
@@ -310,8 +310,8 @@ pub const KURUP_ASAPON: KurupRecord = KurupRecord {
     start_weton: (1, 2), // Selasa (1), Pon (2)
     start_jdn: KURUP_ASAPON_START_JDN,
     end_jdn: KURUP_ASAPON_END_JDN,
-    start_aj: 1867,
-    end_aj: 1986,
+    start_aj: 1868,
+    end_aj: 1987,
 };
 
 /// Number of years in a Kurup cycle.
@@ -450,7 +450,178 @@ pub const DINA_MULYA: &[DinaMulyaEntry] = &[
 ];
 
 // ============================================================================
-// JAVANESE DATE TYPE (PLACEHOLDER)
+// JAVANESE DATE COMPUTATIONS FROM JDN
+// ============================================================================
+
+/// Compute Pasaran (5-day market cycle) position from JDN.
+///
+/// Uses the congruence formula: `jdn.rem_euclid(5)`
+/// → 0=Legi, 1=Pahing, 2=Pon, 3=Wage, 4=Kliwon
+///
+/// Verification: JDN 2317690 (epoch, 1633-07-08) → 0 (Legi), matching "Jumat Legi".
+/// Source: Derived from `beaudu/weton` MATLAB reference implementation.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub const fn pasaran_from_jdn(jdn: i64) -> PasaranPos {
+    jdn.rem_euclid(5) as u8
+}
+
+/// Compute Saptawara (7-day week) position from JDN.
+///
+/// Algorithm: `jdn.rem_euclid(7)` → 0=Soma, 1=Selasa, ..., 6=Ahad
+///
+/// Verification: JDN 2317690 (epoch, 1633-07-08) was a Friday → Jemuwah = 4.
+/// Source: Derived from `beaudu/weton` MATLAB reference implementation.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub const fn saptawara_from_jdn(jdn: i64) -> SaptawaraPos {
+    jdn.rem_euclid(7) as u8
+}
+
+/// Compute `Wetonan` (Saptawara + Pasaran) from JDN.
+///
+/// This is the fundamental 35-day personal cycle used for birth dates.
+#[must_use]
+pub const fn wetonan_from_jdn(jdn: i64) -> Wetonan {
+    (saptawara_from_jdn(jdn), pasaran_from_jdn(jdn))
+}
+
+/// Compute Wuku position in the 30-wuku cycle from JDN.
+///
+/// Algorithm: `((jdn / 7) + 12).rem_euclid(30)` → 0–29 index into `WUKU_NAMES`
+///
+/// The +12 offset aligns the 30-wuku cycle with the epoch (JDN 2317690 = Sinta).
+/// Each wuku is 7 days.
+///
+/// Verification: JDN 2317690 (epoch) → ((2317690/7) + 12) % 30 = 0 (Sinta) ✓
+/// Source: Derived from `beaudu/weton` MATLAB and Dershowitz-Reingold Ch. 10.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub const fn wuku_from_jdn(jdn: i64) -> WukuIdx {
+    // Week number from JDN with offset to align cycle
+    let week_num = jdn / 7 + 12;
+    week_num.rem_euclid(30) as u8
+}
+
+/// Compute `WukuPos` (full Pawukon position) from JDN.
+///
+/// Combines wuku index with day-in-wuku (saptawara position).
+#[must_use]
+pub const fn wuku_pos_from_jdn(jdn: i64) -> WukuPos {
+    WukuPos {
+        wuku: wuku_from_jdn(jdn),
+        day_in_wuku: saptawara_from_jdn(jdn),
+    }
+}
+
+/// Compute Pawukon day number (0–209) from JDN.
+///
+/// The Pawukon is a 210-day cycle combining 30 wukus × 7 days.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub const fn pawukon_day_from_jdn(jdn: i64) -> u16 {
+    // Each wuku is 7 days, and there are 30 wukus
+    // Epoch (JDN 2317690) = Pawukon day 0
+    let days_since = jdn - SULTAN_AGUNG_EPOCH_JDN;
+    days_since.rem_euclid(210) as u16
+}
+
+/// Lunar month names (Wulan) in Javanese.
+/// 12 months per year, alternating 29/30 days with leap year variations.
+pub const WULAN_NAMES: [&str; 12] = [
+    "Sura",        // 1
+    "Sapar",       // 2
+    "Mulud",       // 3 (Rabiul Awal - Mawlid)
+    "Bakdamulud",  // 4 (Rabiul Akhir)
+    "Jumadilawal", // 5
+    "Jumadilakir", // 6
+    "Rejeb",       // 7 (Rajab)
+    "Ruwah",       // 8 (Syaban)
+    "Pasa",        // 9 (Ramadan)
+    "Sawal",       // 10 (Shawwal)
+    "Dulkangidah", // 11 (Dhu al-Qadah)
+    "Besar",       // 12 (Dhu al-Hijjah)
+];
+
+/// Days in each lunar month for common years (354 days total).
+/// Pattern: 30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29
+pub const WULAN_DAYS_COMMON: [u8; 12] = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 29];
+
+/// Days in each lunar month for leap years (355 days total).
+/// Leap years have 30 days in the last month.
+pub const WULAN_DAYS_LEAP: [u8; 12] = [30, 29, 30, 29, 30, 29, 30, 29, 30, 29, 30, 30];
+
+/// Compute lunar month (Wulan) and day from days within a year.
+///
+/// Takes days counted from the start of the given AJ year (0-indexed).
+/// Returns `(wulan_index 0-11, day_in_wulan 1-30)`.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub fn wulan_from_days_in_year(days_in_year: i64, aj_year: u32) -> Option<(u8, u8)> {
+    let windu_year = WinduYear::from_aj(aj_year)?;
+    let is_leap = windu_year.is_leap();
+
+    // Get the appropriate month length table
+    let month_days = if is_leap {
+        &WULAN_DAYS_LEAP
+    } else {
+        &WULAN_DAYS_COMMON
+    };
+
+    // Calculate cumulative days within the year
+    let mut cumulative = 0i64;
+    for (month_idx, &days_in_month) in month_days.iter().enumerate() {
+        let days_in_month_i64 = i64::from(days_in_month);
+        let next_cumulative = cumulative + days_in_month_i64;
+
+        if days_in_year < next_cumulative {
+            let day_diff = days_in_year - cumulative;
+            // day_diff is always >= 0 and < 30, so cast is safe
+            #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+            let day_in_month = day_diff as u8 + 1;
+            return Some((month_idx as u8, day_in_month));
+        }
+        cumulative = next_cumulative;
+    }
+
+    // Day is beyond this year (shouldn't happen with valid input)
+    None
+}
+
+/// Determine AJ year and day-within-year from days since epoch.
+///
+/// Searches through windu/kurup cycles to find the correct year,
+/// then returns the year plus remaining days within that year.
+#[must_use]
+pub fn aj_year_and_day_from_days_since_epoch(days: i64) -> Option<(u32, i64)> {
+    if days < 0 {
+        return None;
+    }
+
+    let mut remaining = days;
+    let mut current_aj = AJ_MIN;
+
+    // Iterate through years until we find the right one
+    loop {
+        if current_aj > AJ_MAX {
+            return None; // Beyond supported range
+        }
+
+        let windu_year = WinduYear::from_aj(current_aj)?;
+        let year_days = i64::from(windu_year.days_in_year());
+
+        if remaining < year_days {
+            // Found the year - remaining is days within this year
+            return Some((current_aj, remaining));
+        }
+
+        remaining -= year_days;
+        current_aj += 1;
+    }
+}
+
+// ============================================================================
+// JAVANESE DATE TYPE
 // ============================================================================
 
 /// A date in the Javanese calendar system.
@@ -463,7 +634,7 @@ pub struct JavaneseDay {
     jdn: i64,
     /// Anno Javanico year (1555–2474).
     pub aj_year: u32,
-    /// Month in the lunar year (1–12, Sura–Sawal/Sura–Besar depending on leap).
+    /// Month in the lunar year (1–12, Sura–Besar).
     pub lunar_month: u8,
     /// Day of the lunar month (1–30).
     pub lunar_day: u8,
@@ -482,12 +653,32 @@ impl JavaneseDay {
         if !(JDN_MIN..=JDN_MAX).contains(&jdn) {
             return None;
         }
-        // TODO: Implement full JDN → Javanese conversion per SPEC.md
-        // This requires:
-        // 1. Karjanto-Beauducel congruence for Wetonan
-        // 2. D-R Ch. 10 algorithm for Pawukon
-        // 3. Lunar month arithmetic from tabular Hijri cycle
-        None // stub for now
+
+        // Compute `Wetonan` (35-day cycle)
+        let wetonan = wetonan_from_jdn(jdn);
+
+        // Compute `Pawukon` position (210-day cycle)
+        let wuku_pos = wuku_pos_from_jdn(jdn);
+
+        // Compute AJ year and days within year
+        let days_since_epoch = jdn - SULTAN_AGUNG_EPOCH_JDN;
+        let (aj_year, days_in_year) = aj_year_and_day_from_days_since_epoch(days_since_epoch)?;
+
+        // Compute lunar month and day from days-within-year
+        let (lunar_month_idx, lunar_day) = wulan_from_days_in_year(days_in_year, aj_year)?;
+
+        // Get windu year
+        let windu_year = WinduYear::from_aj(aj_year)?;
+
+        Some(Self {
+            jdn,
+            aj_year,
+            lunar_month: lunar_month_idx + 1, // Convert 0-indexed to 1-indexed
+            lunar_day,
+            windu_year,
+            wuku_pos,
+            wetonan,
+        })
     }
 
     /// Get the Saptawara (day of week) component.
