@@ -1,9 +1,9 @@
 # nusantara-calendar
 
-[![CI](https://img.shields.io/github/actions/workflow/status/your-org/nusantara-calendar/ci.yml?branch=main&label=CI)](https://github.com/your-org/nusantara-calendar/actions)
+[![CI](https://img.shields.io/github/actions/workflow/status/SHA888/nusantara-calendar/ci.yml?branch=main&label=CI)](https://github.com/SHA888/nusantara-calendar/actions)
 [![crates.io](https://img.shields.io/crates/v/nusantara-calendar.svg)](https://crates.io/crates/nusantara-calendar)
 [![docs.rs](https://docs.rs/nusantara-calendar/badge.svg)](https://docs.rs/nusantara-calendar)
-[![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](#license)
+[![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue.svg)](#license)
 [![MSRV: 1.80](https://img.shields.io/badge/MSRV-1.80-orange.svg)](https://blog.rust-lang.org/2024/07/25/Rust-1.80.0.html)
 
 A comprehensive Rust crate covering every traditional calendar system with a documented algorithmic basis across the Indonesian archipelago. This crate provides unified `calendar-core` trait integration for multiple Indonesian/Nusantara calendar systems.
@@ -40,6 +40,8 @@ This crate uses feature flags to minimize compilation time and binary size:
 
 ### Workspace Documentation
 - **[Main README](README.md)** - This file - workspace overview and quick start
+- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Design decisions and dependency graph
+- **[SPEC.md](SPEC.md)** - Full workspace specification
 - **[TODO.md](TODO.md)** - Implementation status and roadmap
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 
@@ -107,31 +109,31 @@ println!("Overall:  {:?}", verdict.overall);
 
 ```
 nusantara-calendar (workspace)
-    calendar-core (separate crate, published to crates.io)
-    nusantara-calendar (main crate with calendar systems)
+    calendar-core (separate crate, published to crates.io v0.1.0)
+    nusantara-calendar (main crate with feature-gated calendar modules, not yet published)
 ```
 
 ### External Dependencies
 
 The crate leverages official, maintained implementations where available:
 
-- **`balinese-calendar` v0.2** - Official Balinese calendar implementation
-- **`nongli` v0.4** - Chinese calendar implementation (license audit required)
+- **`balinese-calendar` v0.2** - Official Balinese calendar implementation (separate repo)
+- **`nongli` v0.4** - Chinese calendar implementation (`chinese-nusantara` feature)
 
 ### calendar-core Integration
 
-All calendar systems implement the `calendar-core` traits:
+All calendar modules implement the `calendar-core` traits:
 
 - `CalendarDate` - Date conversion and validation
 - `CalendarMetadata` - Calendar metadata and epoch information
-- `HasAuspiciousness` - Auspiciousness calculations
+- `HasAuspiciousness` - Auspiciousness calculations (where algorithmically documented)
 
 ## Publishing
 
 Both crates can be published independently to crates.io:
 
 ```sh
-# Publish calendar-core first
+# Publish calendar-core first (already published at v0.1.0)
 cargo publish -p calendar-core
 
 # Then publish nusantara-calendar
@@ -177,13 +179,14 @@ cargo publish -p nusantara-calendar
 
 ## `no_std` and WASM
 
-Core computation crates are `no_std + alloc` compatible. They compile to WASM32:
+Core computation modules are `no_std + alloc` compatible. They compile to WASM32:
 
 ```sh
-cargo build --target wasm32-unknown-unknown --features balinese,jawa
+cargo build --target wasm32-unknown-unknown -p nusantara-calendar \
+  --no-default-features --features balinese,jawa,hijriyah
 ```
 
-`chinese-nusantara` and `dewasa-engine` are `std`-only and should be feature-gated in WASM contexts.
+`chinese-nusantara` and `dewasa-engine` are `std`-only and should be excluded in WASM contexts.
 
 ---
 
@@ -204,7 +207,12 @@ cargo build --target wasm32-unknown-unknown --features balinese,jawa
 
 ## License
 
-Licensed under the [Apache License, Version 2.0](LICENSE).
+Licensed under either of:
+
+- [MIT License](LICENSE-MIT)
+- [Apache License, Version 2.0](LICENSE-APACHE)
+
+at your option.
 
 > **Note on dependencies**: This crate depends on `balinese-calendar` (MIT) and may depend on `nongli` (MIT) when the `chinese-nusantara` feature is enabled. All dependencies are license-compatible.
 

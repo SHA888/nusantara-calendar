@@ -28,8 +28,8 @@ Three non-negotiable properties, in priority order:
    reference without running the code?* If no, the implementation is a stub.
 
 2. **Interoperability through a universal pivot.** Julian Day Number (JDN) is the
-   single exchange format between all calendar systems. No calendar crate imports
-   another calendar crate directly — they only share `calendar-core`.
+   single exchange format between all calendar systems. No calendar module imports
+   another calendar module directly — they only share `calendar-core`.
 
 3. **Composability at the type level.** The `CalendarDate` trait is the only required
    interface. A `dewasa-engine` instance can hold any combination of calendar
@@ -61,43 +61,66 @@ Sunda ──────────┘
 **JDN functions** (in `calendar-core`, `no_std`):
 
 ```rust
-// Meeus, Astronomical Algorithms, Ch. 7 — proleptic Gregorian
-pub const fn gregorian_to_jdn(y: i32, m: u8, d: u8) -> i64 { ... }
-pub const fn jdn_to_gregorian(jdn: i64) -> (i32, u8, u8)   { ... }
+// gregorian_to_jdn: Meeus, Astronomical Algorithms, Ch. 7 — proleptic Gregorian
+// jdn_to_gregorian: Fliegel & van Flandern (1968), USNO algorithm
+pub fn gregorian_to_jdn(year: i32, month: u8, day: u8) -> JDN { ... }
+pub fn jdn_to_gregorian(jdn: JDN) -> (i32, u8, u8)            { ... }
 ```
 
-Both are `const fn` — usable in `const` contexts and in `#[no_std]` targets.
+Note: these are regular functions, not `const fn`. `jdn_to_gregorian` performs a
+range-validity assertion that is not stable in `const` context.
 
 **Verification anchor:** `gregorian_to_jdn(1582, 10, 15) == 2299161` (Gregorian reform date).
+**Sultan Agung anchor:** `gregorian_to_jdn(1633, 7, 8) == 2317690`.
 
 ---
 
 ## 3. Crate Dependency Graph
 
 ```
-                         ┌──────────────────┐
-                         │   calendar-core   │
-                         │  (no_std + alloc) │
-                         └────────┬─────────┘
-              ┌──────────┬────────┼────────────────────────────────┐
-              │          │        │            │                    │
-    ┌─────────▼──┐  ┌────▼───┐  ┌▼───────┐  ┌▼──────────────┐  ┌─▼──────────────┐
-    │ balinese-  │  │  jawa  │  │hijriyah│  │chinese-        │  │  batak/sunda/  │
-    │ calendar   │  │        │  │        │  │nusantara       │  │  tengger/bugis │
-    │ (no_std)   │  │(no_std)│  │(no_std)│  │(std, nongli)   │  │  sasak/dayak/  │
-    └─────────┬──┘  └────┬───┘  └──┬─────┘  └───┬────────────┘  │  toraja/       │
-              │          │         │             │               │  minangkabau   │
-              └──────────┴────┬────┴─────────────┘               └───┬────────────┘
-                              │                                       │
-                    ┌─────────▼───────────────────────────────────────▼──┐
-                    │                  dewasa-engine                      │
-                    │          (std, HashMap aggregation)                 │
-                    └────────────────────────────────────────────────────┘
+                    ┌──────────────────────────┐
+                    │       calendar-core       │
+                    │  v0.1.0 · published       │
+                    │  no_std + alloc           │
+                    └────────────┬─────────────┘
+                                 │
+    ┌────────────────────────────┼────────────────────────────────────┐
+    │                            │                                    │
+    │  balinese-calendar v0.2.0  │                                    │
+    │  (external, separate repo) │                                    │
+    │  crates.io/crates/         │                                    │
+    │  balinese-calendar         │                                    │
+    └────────────┬───────────────┘                                    │
+                 │                                                    │
+    ┌────────────▼────────────────────────────────────────────────────▼──┐
+    │                   nusantara-calendar v0.1.0                        │
+    │               (feature-gated modules, not yet published)           │
+    │                                                                    │
+    │  src/balinese/     ← wraps balinese-calendar external dep          │
+    │  src/jawa/         ← stub                                          │
+    │  src/hijriyah/     ← stub                                          │
+    │  src/batak/        ← stub                                          │
+    │  src/sunda/        ← stub                                          │
+    │  src/tengger/      ← stub                                          │
+    │  src/bugis/        ← stub                                          │
+    │  src/sasak/        ← stub                                          │
+    │  src/dayak/        ← stub                                          │
+    │  src/toraja/       ← stub                                          │
+    │  src/minangkabau/  ← stub                                          │
+    │  src/chinese_nusantara/ ← stub (will wrap nongli)                 │
+    │  src/dewasa_engine/ ← stub (std-only, HashMap aggregation)        │
+    └────────────────────────────────────────────────────────────────────┘
 ```
 
-**Rule:** No calendar crate may import another calendar crate. All shared state flows
-through `calendar-core` types only. This keeps crates independently publishable and
+**Rule:** No calendar module may import another calendar module. All shared state flows
+through `calendar-core` types only. This keeps modules independently testable and
 prevents circular dependency chains.
+
+**External vs internal distinction:**
+- `calendar-core` — standalone published crate, no_std, no calendar logic
+- `balinese-calendar` — standalone published crate, separate repository
+- All other calendar systems — feature-gated modules within `nusantara-calendar`
+- `nusantara-calendar` is the single publishable umbrella crate
 
 ---
 
@@ -106,69 +129,94 @@ prevents circular dependency chains.
 ### `CalendarDate`
 
 ```rust
-pub trait CalendarDate: Sized + Clone + PartialEq {
-    fn from_jdn(jdn: i64) -> Result<Self, CalendarError>;
-    fn to_jdn(&self) -> i64;
+pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
+    fn from_jdn(jdn: JDN) -> Result<Self, CalendarError>
+    where
+        Self: Sized;
+
+    fn to_jdn(&self) -> JDN;
+
+    fn calendar_name() -> &'static str;
+
+    fn validate_range(&self) -> Result<(), CalendarError>;
 
     // Default impls — do not override unless the calendar's natural representation
     // requires a non-standard Gregorian ↔ JDN mapping.
-    fn from_gregorian(y: i32, m: u8, d: u8) -> Result<Self, CalendarError>;
-    fn to_gregorian(&self) -> (i32, u8, u8);
+    fn from_gregorian(year: i32, month: u8, day: u8) -> Result<Self, CalendarError>
+    where
+        Self: Sized,
+    {
+        let jdn = gregorian_to_jdn(year, month, day);
+        Self::from_jdn(jdn)
+    }
+
+    fn to_gregorian(&self) -> (i32, u8, u8) {
+        jdn_to_gregorian(self.to_jdn())
+    }
 }
 ```
 
 **Invariant:** `Self::from_jdn(x.to_jdn()) == Ok(x)` for all valid `x`. Tests must
 verify this round-trip for at least 100 diverse dates spanning the full supported range
-of each crate.
+of each module.
 
 ### `CalendarMetadata`
 
 ```rust
 pub trait CalendarMetadata {
-    fn calendar_name() -> &'static str;
-    fn ethnic_group() -> &'static str;
-    fn region() -> &'static str;
-    fn epoch_jdn() -> i64;
-    fn reference_sources() -> &'static [&'static str];
+    fn epoch() -> JDN;
+    fn cycle_length() -> Option<CycleYear> { None }
+    fn description() -> &'static str;
+    fn cultural_origin() -> &'static str;
 }
 ```
 
-`reference_sources()` must return at least one citable source. Returning an empty slice
-is a compile-time warning (enforced via a `const` assertion in tests).
+`description()` and `cultural_origin()` must return non-empty strings. Returning an
+empty `""` is a documentation failure and must be caught in tests via a non-empty
+assertion.
 
 ### `HasAuspiciousness`
 
 Optional trait. Implement only when the calendar system has documented auspiciousness
 rules that can be algorithmically derived. Do **not** implement by guessing.
 
+```rust
+pub trait HasAuspiciousness {
+    type Activity;
+    type AuspiciousnessLevel;
+
+    fn auspiciousness_for(&self, activity: &Self::Activity) -> Self::AuspiciousnessLevel;
+    fn is_auspicious_day(&self) -> bool;
+}
+```
+
 ---
 
 ## 5. `no_std` Strategy
 
-| Crate | Policy | Justification |
+| Crate / Module | Policy | Justification |
 |---|---|---|
 | `calendar-core` | `no_std + alloc` | All types are plain data; no OS interaction |
-| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | `no_std + alloc` | pure arithmetic (crate: https://crates.io/crates/balinese-calendar) |
-| `jawa` | `no_std + alloc` | Pure modular arithmetic on `const` tables |
-| `hijriyah` (Option A) | `no_std + alloc` | Tabular algorithm from D-R Ch. 6; no float |
-| `chinese-nusantara` | `std` required | `nongli` → `chrono` → `std` |
-| `batak` (tabular) | `no_std + alloc` | Tabular Porhalaan; lookup tables as `const` |
-| `batak` (astronomical) | `std` required | `libm` or `std::f64` for heliacal angle calc |
-| `sunda`, `tengger` | `no_std + alloc` | Saka arithmetic |
-| `bugis`, `sasak`, `dayak`, `toraja`, `minangkabau` | `no_std + alloc` | Cycle arithmetic; stubs for unverified parts |
-| `dewasa-engine` | `std` required | `HashMap<Activity, CrossCalendarVerdict>` |
+| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | `no_std + alloc` | Pure arithmetic (crate: https://crates.io/crates/balinese-calendar) |
+| `nusantara-calendar` (crate root) | `no_std + alloc` | Inherits from feature-gated modules |
+| `balinese` module | `no_std + alloc` | Wraps no_std external crate |
+| `jawa` module | `no_std + alloc` | Pure modular arithmetic on `const` tables |
+| `hijriyah` module | `no_std + alloc` | Tabular algorithm from D-R Ch. 6; no float |
+| `chinese_nusantara` module | `std` required | `nongli` → `chrono` → `std` |
+| `batak` module (tabular) | `no_std + alloc` | Tabular Porhalaan; lookup tables as `const` |
+| `batak` module (astronomical) | `std` required | `libm` or `std::f64` for heliacal angle calc |
+| `sunda`, `tengger` modules | `no_std + alloc` | Saka arithmetic |
+| `bugis`, `sasak`, `dayak`, `toraja`, `minangkabau` modules | `no_std + alloc` | Cycle arithmetic; stubs for unverified parts |
+| `dewasa_engine` module | `std` required | `HashMap<Activity, CrossCalendarVerdict>` |
 
-**Implementation pattern for crates that need both:**
+**Implementation pattern for modules that need both:**
 
 ```toml
-# Cargo.toml
+# nusantara-calendar Cargo.toml
 [features]
 default = ["std"]
 std = []
 astronomical = ["std", "libm"]
-
-[dependencies]
-libm = { version = "0.2", optional = true }
 ```
 
 ```rust
@@ -178,28 +226,47 @@ extern crate alloc;
 ```
 
 **`alloc` usage is permitted everywhere.** `String` (for error messages), `Vec` (for
-dynamic verdict lists in `dewasa-engine`), and `Box<dyn Error>` are all fine. The
+dynamic verdict lists in `dewasa_engine`), and `Box<dyn Error>` are all fine. The
 constraint is *no `std`*, not *no heap*.
 
 ---
 
 ## 6. Feature Flag System
 
-Every crate in the workspace uses the same four flags for consistency:
+`nusantara-calendar` uses feature flags to enable calendar modules:
 
 ```toml
 [features]
-default = []        # no features on by default; let consumers opt in
-std          = []   # enables std-dependent impls
-serde        = ["dep:serde"]
-wasm         = ["dep:wasm-bindgen"]
-astronomical = ["std", "dep:libm"]   # only in observation-dependent crates
+default = ["std"]
+std     = []
+serde   = ["dep:serde", "calendar-core/serde"]
+wasm    = ["calendar-core/wasm-bindgen", "wasm-bindgen"]
+astronomical = ["std", "dep:libm"]
+
+# Calendar modules
+balinese         = ["balinese-calendar"]
+jawa             = ["std"]
+hijriyah         = ["std"]
+batak            = ["std"]
+sunda            = ["std"]
+tengger          = ["std"]
+bugis            = ["std"]
+sasak            = ["std"]
+dayak            = ["std"]
+toraja           = ["std"]
+minangkabau      = ["std"]
+chinese-nusantara = ["nongli"]
+dewasa-engine    = ["std"]
+
+all-calendars = ["balinese", "jawa", "hijriyah", "batak", "sunda", "tengger",
+                  "bugis", "sasak", "dayak", "toraja", "minangkabau", "chinese-nusantara"]
+all           = ["all-calendars", "dewasa-engine"]
 ```
 
 **Flag semantics:**
 
-- `std`: unlocks `std::error::Error` impl on `CalendarError`, `HashMap` in
-  `dewasa-engine`, and `std::fmt::Display` improvements.
+- `std`: unlocks `std::error::Error` impl on `CalendarError` and `std::fmt::Display`
+  improvements. Required by most calendar modules.
 - `serde`: adds `#[derive(Serialize, Deserialize)]` to all public structs and enums.
   Gated because serde adds compile time; not every consumer needs it.
 - `wasm`: adds `#[wasm_bindgen]` exports. Requires `wasm-bindgen` in the toolchain.
@@ -221,7 +288,6 @@ pub const WUKU_NAMES: [&str; 30] = [
 
 // ❌ forbidden
 pub static WUKU_NAMES: Vec<&str> = vec![ /* ... */ ]; // heap at runtime
-pub fn wuku_name(i: usize) -> &'static str { /* match */ } // fine, but prefer const array
 ```
 
 Rationale: `const` arrays are zero-cost, WASM-safe, and verifiable against source
@@ -247,7 +313,7 @@ error.
 ```rust
 #[macro_export]
 macro_rules! stub {
-    ($msg:literal) => {
+    ($msg:expr) => {
         return Err($crate::CalendarError::NotImplemented($msg.to_string()))
     };
 }
@@ -283,16 +349,16 @@ pattern-match on `CalendarError::NotImplemented` and handle gracefully.
 
 ## 9. Observation-Dependent Calendars
 
-Three crates have calendar cycles that depend on heliacal astronomical events that
+Three modules have calendar cycles that depend on heliacal astronomical events that
 cannot be computed by pure tabular arithmetic:
 
-| Crate | Observation event | Observer latitude |
+| Module | Observation event | Observer latitude |
 |---|---|---|
 | `batak` | Orion (Waluku) / Scorpius first rise | Lake Toba, ~2.6°N |
 | `sasak` | Pleiades (Bintang Rowot) first rise | Lombok, ~8.6°S |
 | `bugis`, `minangkabau` | Pleiades (Bintang Kartika) visibility | Sulawesi ~4°S / Sumatra ~0° |
 
-**Dual-mode API pattern (mandatory for all observation-dependent crates):**
+**Dual-mode API pattern (mandatory for all observation-dependent modules):**
 
 ```rust
 impl BatakDay {
@@ -318,22 +384,21 @@ results are opt-in. This preserves the `no_std` guarantee on the default feature
 
 ## 10. WASM Compilation
 
-All `no_std + alloc` crates must compile cleanly to `wasm32-unknown-unknown`:
+All `no_std + alloc` modules must compile cleanly to `wasm32-unknown-unknown`:
 
 ```sh
-# Verified in CI for each crate
+# Verified in CI
 cargo build --target wasm32-unknown-unknown -p calendar-core --no-default-features
-cargo build --target wasm32-unknown-unknown -p jawa --no-default-features
-cargo build --target wasm32-unknown-unknown -p balinese-calendar --no-default-features
-cargo build --target wasm32-unknown-unknown -p hijriyah --no-default-features
+cargo build --target wasm32-unknown-unknown -p nusantara-calendar \
+  --no-default-features --features balinese,jawa,hijriyah
 ```
 
 `chinese-nusantara` and `dewasa-engine` do **not** have a WASM build target. This is
-expected and is documented in their `Cargo.toml` with:
+expected and is documented in `Cargo.toml` with:
 
 ```toml
 [package.metadata.docs.rs]
-targets = ["x86_64-unknown-linux-gnu"]  # WASM not supported for this crate
+targets = ["x86_64-unknown-linux-gnu"]  # WASM not supported when these features are enabled
 ```
 
 **WASM `wasm_bindgen` exports** (when `wasm` feature is enabled) expose a flat,
@@ -343,7 +408,7 @@ date-string-based API suitable for JavaScript consumers of `dedauh.id`:
 #[cfg(feature = "wasm")]
 #[wasm_bindgen]
 pub fn balinese_from_gregorian(y: i32, m: u8, d: u8) -> Result<JsValue, JsValue> {
-    BalineseDay::from_gregorian(y, m, d)
+    BalineseDate::from_gregorian(y, m, d)
         .map(|d| serde_wasm_bindgen::to_value(&d).unwrap())
         .map_err(|e| JsValue::from_str(&e.to_string()))
 }
@@ -353,7 +418,7 @@ pub fn balinese_from_gregorian(y: i32, m: u8, d: u8) -> Result<JsValue, JsValue>
 
 ## 11. `dewasa-engine` Aggregation Model
 
-`dewasa-engine` is the only crate that imports more than one calendar crate. Its
+`dewasa_engine` is the only module that imports more than one calendar module. Its
 aggregation model:
 
 ```
@@ -383,11 +448,10 @@ Output: NusantaraDay with HashMap<Activity, CrossCalendarVerdict>
 
 **Conflict definition:** A `CalendarConflict` is recorded when two or more calendars
 return `AuspiciousnessLevel` values that are on opposite sides of `Neutral`
-(i.e., one `Auspicious`/`HighlyAuspicious` and another `Inauspicious`/`Forbidden`).
+(i.e., one `Auspicious`/`VeryAuspicious` and another `Inauspicious`/`VeryInauspicious`).
 
 **Consensus rule (default):** `overall` = the most cautious level across all calendars
-that returned a non-`Unknown` result. `Unknown` is excluded from consensus — it does
-not drag an otherwise `HighlyAuspicious` day down to `Unknown`.
+that returned a non-`Unknown` result.
 
 ---
 
@@ -395,12 +459,13 @@ not drag an otherwise `HighlyAuspicious` day down to `Unknown`.
 
 | Dependency | Version | License | Used by | Decision |
 |---|---|---|---|---|
-| `thiserror` | 2.0.18 | MIT OR Apache-2.0 | `calendar-core` | Standard error derive |
-| `nongli` | 0.4.1 | MIT | `chinese-nusantara` | Only Rust Chinese lunisolar crate with JDN-compatible API |
-| `chrono` | 0.4.44 | MIT OR Apache-2.0 | `chinese-nusantara` (via nongli) | Transitive; `std` feature only |
-| `serde` | 1.0.228 | MIT OR Apache-2.0 | all (optional `serde` feature) | De-facto serialization standard |
-| `wasm-bindgen` | 0.2.114 | MIT OR Apache-2.0 | all (optional `wasm` feature) | Required for WASM JS interop |
-| `libm` | 0.2.16 | MIT | `batak`, `sasak`, `bugis`, `minangkabau` (optional `astronomical`) | `no_std`-compatible float math |
+| `thiserror` | 2.x | MIT OR Apache-2.0 | `calendar-core` | Standard error derive |
+| `balinese-calendar` | 0.2.x | MIT | `nusantara-calendar` (`balinese` feature) | Official Balinese implementation |
+| `nongli` | 0.4.x | MIT | `nusantara-calendar` (`chinese-nusantara` feature) | Only Rust Chinese lunisolar crate with compatible API |
+| `chrono` | 0.4.x | MIT OR Apache-2.0 | transitive via `nongli` | `std` feature only |
+| `serde` | 1.x | MIT OR Apache-2.0 | all (optional `serde` feature) | De-facto serialization standard |
+| `wasm-bindgen` | 0.2.x | MIT OR Apache-2.0 | all (optional `wasm` feature) | Required for WASM JS interop |
+| `libm` | 0.2.x | MIT | `batak`, `sasak`, `bugis`, `minangkabau` (optional `astronomical`) | `no_std`-compatible float math |
 
 **Explicitly excluded:**
 
@@ -415,20 +480,27 @@ not drag an otherwise `HighlyAuspicious` day down to `Unknown`.
 
 ```rust
 pub enum CalendarError {
-    OutOfRange(String),     // Date outside the crate's supported year range
-    NotImplemented(String), // Algorithm known but not yet coded; stub!() target
-    Ambiguous(String),      // Source data conflict — algorithm has multiple valid readings
+    OutOfRange(String),         // Date outside the module's supported year range
+    InvalidParameters(String),  // Malformed input (wrong month number, day > 31, etc.)
+    NotImplemented(String),     // Algorithm known but not yet coded; stub!() target
+    ArithmeticError(String),    // Internal calculation overflow or undefined result
 }
 ```
 
-**`OutOfRange` usage:** Each crate documents its supported year range. E.g., `jawa`
+**`OutOfRange` usage:** Each module documents its supported year range. E.g., `jawa`
 supports AJ 1555–2474 (Gregorian 1633–2169, spanning the current and next kurup).
 Dates outside this range return `OutOfRange`, not a silently wrong result.
 
-**`Ambiguous` usage:** Reserved for cases where two equally credible primary sources
-give different rules for the same date element. The error message must cite both sources
-and describe the divergence. This is not a stub — the algorithm exists but has
-irreconcilable variant readings.
+**`InvalidParameters` usage:** For inputs that are structurally invalid — month 13,
+day 0, negative day. Distinct from `OutOfRange` (in-range but structurally bad input).
+
+**`ArithmeticError` usage:** Reserved for internal calculation failures — integer
+overflow on an intermediate value, undefined modulo, etc. Should not be reachable on
+valid input; indicates a bug in the implementation.
+
+**`NotImplemented` usage:** Returned by `stub!()`. Indicates the algorithm exists in
+principle but has not been coded yet. Consumers should handle this case gracefully.
+Stub-to-implementation upgrades are not breaking changes.
 
 ---
 
@@ -436,11 +508,11 @@ irreconcilable variant readings.
 
 Follows [Semantic Versioning 2.0.0](https://semver.org/).
 
-| Version series | Crates included | API stability |
+| Version series | Scope | API stability |
 |---|---|---|
-| 0.x | All crates pre-1.0 | Breaking changes allowed between minors |
-| 1.0.0 | All crates (post dewasa-engine stabilization) | `CalendarDate`, `CalendarMetadata`, `CalendarError` are stable |
-| 1.x | All crates | Additive only: new calendar crates, new `Activity` variants (non-exhaustive), stub → impl upgrades |
+| 0.x | `calendar-core` + `nusantara-calendar` pre-1.0 | Breaking changes allowed between minors |
+| 1.0.0 | All modules (post dewasa-engine stabilization) | `CalendarDate`, `CalendarMetadata`, `CalendarError` are stable |
+| 1.x | All modules | Additive only: new calendar modules, new `Activity` variants (non-exhaustive), stub → impl upgrades |
 
 **`#[non_exhaustive]`** is applied to `Activity` and `AuspiciousnessLevel`. Consumers
 must handle `_` arms. This allows adding new activities without a semver break.

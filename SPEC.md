@@ -1,5 +1,8 @@
-# `nusantara-calendar` Workspace Specification — v2
+# `nusantara-calendar` Workspace Specification — v3
 
+> **Changelog from v2**
+> - v3: Workspace structure corrected to actual 2-crate layout (calendar-core + nusantara-calendar with feature-gated modules). balinese-calendar remains an external standalone crate. CalendarDate, CalendarMetadata, HasAuspiciousness, Activity, AuspiciousnessLevel, and CalendarError definitions updated to match published calendar-core v0.1.0 implementation.
+>
 > **Changelog from v1**
 > - Fix 1: Sultan Agung epoch corrected to 1633-07-08, JDN 2317690
 > - Fix 2: `misykat` GPL-3.0 licensing constraint documented with resolution paths
@@ -22,203 +25,268 @@ crate must document what IS known and expose a `stub!()` placeholder with source
 rather than silently omitting or guessing.
 
 The workspace will eventually power `dedauh.id` — a multi-calendar SaaS platform — and must
-be API-stable, WASM-compilable, and publishable to crates.io as independent crates.
+be API-stable, WASM-compilable, and publishable to crates.io.
 
 ---
 
 ## Workspace Structure
 
+The workspace contains **two crates**. All calendar systems are feature-gated modules within
+`nusantara-calendar`, not separate crates. `balinese-calendar` is an external standalone crate
+in its own repository.
+
 ```
-nusantara-calendar/
-├── Cargo.toml                    # workspace root
+nusantara-calendar/              ← workspace root
+├── Cargo.toml                   ← workspace root; lists calendar-core + nusantara-calendar
 ├── crates/
-│   ├── calendar-core/            # shared traits, JDN pivot, error types
-│   ├── balinese-calendar/        # existing crate (git submodule or local path)
-│   ├── jawa/                     # Javanese Pawukon + Wetonan + Windu + Pranata Masa
-│   ├── hijriyah/                 # Islamic lunar (thin wrapper + Indonesian extensions)
-│   ├── chinese-nusantara/        # Chinese lunisolar (Peranakan context)
-│   ├── batak/                    # Batak Porhalaan (Toba, Karo, Simalungun variants)
-│   ├── sunda/                    # Sundanese Kala Sunda / Pranatamangsa Sunda
-│   ├── bugis/                    # Bugis-Makassar lunar calendar
-│   ├── sasak/                    # Sasak Lombok traditional calendar
-│   ├── dayak/                    # Dayak Kaharingan agricultural calendar
-│   ├── toraja/                   # Toraja ritual calendar
-│   ├── tengger/                  # Tengger (Bromo) Hindu calendar variant
-│   ├── minangkabau/              # Minangkabau agricultural/ceremonial cycles
-│   └── dewasa-engine/            # cross-calendar auspiciousness correlator
+│   ├── calendar-core/           ← published v0.1.0: shared traits, JDN pivot, error types
+│   │   └── src/lib.rs
+│   └── nusantara-calendar/      ← not yet published; umbrella crate with feature-gated modules
+│       ├── Cargo.toml
+│       └── src/
+│           ├── lib.rs
+│           ├── balinese/        ← wraps external balinese-calendar v0.2.0
+│           ├── jawa/            ← stub
+│           ├── hijriyah/        ← stub
+│           ├── batak/           ← stub
+│           ├── sunda/           ← stub
+│           ├── tengger/         ← stub
+│           ├── bugis/           ← stub
+│           ├── sasak/           ← stub
+│           ├── dayak/           ← stub
+│           ├── toraja/          ← stub
+│           ├── minangkabau/     ← stub
+│           ├── chinese_nusantara/ ← stub (will wrap nongli)
+│           └── dewasa_engine/   ← stub (std-only)
 ```
+
+**External dependency (separate repo):**
+- `balinese-calendar` v0.2.0 — https://github.com/SHA888/balinese-calendar
+  — https://crates.io/crates/balinese-calendar — MIT license — no_std + alloc
 
 ---
 
 ## Crate Specifications
 
-### `calendar-core`
+### `calendar-core` — v0.1.0 (published)
 
-Universal pivot and shared contracts.
+Universal pivot and shared contracts. No calendar logic lives here.
 
 #### `no_std` policy
 
-`calendar-core` and all computation kernels (pure arithmetic, lookup tables, cycle
-arithmetic) **must** be `no_std + alloc` compatible. The `CalendarDate` trait and `CalendarError`
-type live here and are therefore `no_std`.
+`calendar-core` is `no_std + alloc`. All types are plain data.
 
-Wrapper crates (`hijriyah`, `chinese-nusantara`) depend on external crates that require `std`.
-They **must** declare `std` as a non-optional dependency and be clearly marked in their
-`Cargo.toml`:
+Modules within `nusantara-calendar` that require `std` (chinese_nusantara, dewasa_engine)
+must be gated behind the `std` feature and documented explicitly.
 
-```toml
-# In hijriyah/Cargo.toml and chinese-nusantara/Cargo.toml
-[features]
-default = ["std"]
-std = []  # non-optional; documented as such
-
-[dependencies]
-# misykat / nongli require std; this crate is std-only
-```
-
-`dewasa-engine` is also `std`-only (uses `HashMap` for verdict aggregation) and must
-document this explicitly. It is **not** subject to the `no_std` requirement.
+#### Types
 
 ```rust
-/// Julian Day Number is the universal interop format.
-/// All calendar implementations convert through JDN.
-pub trait CalendarDate: Sized + Clone + PartialEq {
-    fn from_jdn(jdn: i64) -> Result<Self, CalendarError>;
-    fn to_jdn(&self) -> i64;
+pub type JDN = i64;             // Julian Day Number
+pub type CycleYear = u32;       // Calendar cycle years
+pub type SubYearPosition = u8;  // Sub-year positions (month, day, weekday)
+```
 
-    // Convenience: default impl via JDN
-    fn from_gregorian(y: i32, m: u8, d: u8) -> Result<Self, CalendarError> {
-        let jdn = gregorian_to_jdn(y, m, d);
-        Self::from_jdn(jdn)
-    }
-    fn to_gregorian(&self) -> (i32, u8, u8) {
-        jdn_to_gregorian(self.to_jdn())
-    }
+#### JDN Functions
+
+```rust
+/// Meeus, Astronomical Algorithms, Ch. 7
+pub fn gregorian_to_jdn(year: i32, month: u8, day: u8) -> JDN { ... }
+
+/// Fliegel & van Flandern (1968), USNO algorithm
+pub fn jdn_to_gregorian(jdn: JDN) -> (i32, u8, u8) { ... }
+```
+
+Verification anchors (both tested in `calendar-core`):
+- `gregorian_to_jdn(1582, 10, 15) == 2299161` — Gregorian reform date
+- `gregorian_to_jdn(1633, 7, 8) == 2317690` — Sultan Agung epoch
+
+#### `CalendarDate` Trait
+
+```rust
+pub trait CalendarDate: Clone + PartialEq + Eq + core::fmt::Debug {
+    fn from_jdn(jdn: JDN) -> Result<Self, CalendarError>
+    where Self: Sized;
+
+    fn to_jdn(&self) -> JDN;
+
+    fn calendar_name() -> &'static str;
+
+    fn validate_range(&self) -> Result<(), CalendarError>;
+
+    // Default impls via JDN — override only for non-standard Gregorian ↔ JDN mappings
+    fn from_gregorian(year: i32, month: u8, day: u8) -> Result<Self, CalendarError>
+    where Self: Sized;
+
+    fn to_gregorian(&self) -> (i32, u8, u8);
 }
+```
 
-pub trait HasAuspiciousness {
-    fn auspiciousness(&self, activity: Activity) -> AuspiciousnessLevel;
-}
+#### `CalendarMetadata` Trait
 
+```rust
 pub trait CalendarMetadata {
-    fn calendar_name() -> &'static str;          // e.g. "Kalender Bali"
-    fn ethnic_group() -> &'static str;           // e.g. "Bali"
-    fn region() -> &'static str;                 // e.g. "Bali, Indonesia"
-    fn epoch_jdn() -> i64;                       // calendar epoch as JDN
-    fn reference_sources() -> &'static [&'static str]; // citable sources
+    fn epoch() -> JDN;
+    fn cycle_length() -> Option<CycleYear> { None }
+    fn description() -> &'static str;
+    fn cultural_origin() -> &'static str;
 }
+```
 
+#### `HasAuspiciousness` Trait
+
+```rust
+pub trait HasAuspiciousness {
+    type Activity;
+    type AuspiciousnessLevel;
+
+    fn auspiciousness_for(&self, activity: &Self::Activity) -> Self::AuspiciousnessLevel;
+    fn is_auspicious_day(&self) -> bool;
+}
+```
+
+#### `Activity` Enum
+
+```rust
 #[non_exhaustive]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Activity {
-    Marriage, BuildingStart, FarmingStart, Travel,
-    MedicalProcedure, Cremation, BusinessLaunch,
-    HarvestStart, FishingStart, SeaVoyage,
-    ReligiousCeremony, AncestorRitual,
+    Marriage,
+    Building,
+    Travel,
+    Business,
+    Agriculture,
+    ReligiousCeremony,
+    Naming,
+    MovingHouse,
+    Education,
+    Medical,
+    Custom(String),
 }
+```
 
-#[derive(Debug, Clone, PartialEq)]
+#### `AuspiciousnessLevel` Enum
+
+```rust
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum AuspiciousnessLevel {
-    HighlyAuspicious, Auspicious, Neutral, Inauspicious, Forbidden,
-    Unknown,    // calendar exists but rule not yet digitized
+    VeryAuspicious,
+    Auspicious,
+    Neutral,
+    Inauspicious,
+    VeryInauspicious,
 }
+```
 
-#[derive(Debug, thiserror::Error)]
+#### `CalendarError`
+
+```rust
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CalendarError {
-    #[error("date out of supported range: {0}")]
-    OutOfRange(String),
-    #[error("algorithm not yet implemented: {0}")]
-    NotImplemented(String),
-    #[error("source data ambiguous: {0}")]
-    Ambiguous(String),
+    OutOfRange(String),         // Date outside the module's supported year range
+    InvalidParameters(String),  // Malformed input
+    NotImplemented(String),     // stub!() target — algorithm known but not coded
+    ArithmeticError(String),    // Internal calculation failure
 }
+```
 
-/// Convenience macro for unimplemented stubs.
-/// Expands to an early return of `CalendarError::NotImplemented`.
+#### `stub!()` Macro
+
+```rust
 #[macro_export]
 macro_rules! stub {
-    ($msg:literal) => {
+    ($msg:expr) => {
         return Err($crate::CalendarError::NotImplemented($msg.to_string()))
     };
 }
 ```
 
-Provide: `gregorian_to_jdn(y, m, d) -> i64` and `jdn_to_gregorian(jdn) -> (i32, u8, u8)`
-using the standard proleptic Gregorian algorithm (Meeus, *Astronomical Algorithms* Ch. 7).
+---
+
+### `nusantara-calendar` — v0.1.0 (not yet published)
+
+Umbrella crate. Re-exports `calendar-core` traits and provides feature-gated calendar modules.
+
+```toml
+[features]
+default = ["std"]
+std     = ["thiserror", "calendar-core/std"]
+serde   = ["dep:serde", "calendar-core/serde"]
+wasm    = ["calendar-core/wasm-bindgen", "wasm-bindgen"]
+
+balinese          = ["balinese-calendar"]
+jawa              = ["std"]
+hijriyah          = ["std"]
+batak             = ["std"]
+sunda             = ["std"]
+tengger           = ["std"]
+bugis             = ["std"]
+sasak             = ["std"]
+dayak             = ["std"]
+toraja            = ["std"]
+minangkabau       = ["std"]
+chinese-nusantara = ["nongli"]
+dewasa-engine     = ["std"]
+
+all-calendars = [all individual calendar features]
+all           = ["all-calendars", "dewasa-engine"]
+```
 
 ---
 
-### `jawa` (Javanese Calendar)
+### `balinese` module
+
+Wrapper around `balinese-calendar` v0.2.0 (external crate). Implements `CalendarDate`,
+`CalendarMetadata`, `HasAuspiciousness` from `calendar-core` on a `BalineseDate` newtype
+that wraps `balinese_calendar::BalineseDate`.
+
+**Status:** Implemented. Tested (9 unit tests + 2 doc tests).
+
+---
+
+### `jawa` module
 
 #### Epoch
-
-> **[Fix 1]** The Sultan Agung calendar reform commenced on **8 July 1633 CE** (Gregorian),
-> corresponding to 1 Sura 1555 AJ, 1 Muharram 1043 AH.
->
-> Verified JDN (Meeus proleptic Gregorian): **2317690**.
->
-> Sources: Beauducel & Karjanto (2020), arXiv:2012.10064; academic PDF "Sultan Agung's Thought
-> of Javanese Islamic Calendar" (Academia.edu, 2021); Wikipedia "Javanese calendar" (verified
-> March 2026 against physical almanac cross-reference).
 
 ```rust
 /// Epoch of the Sultan Agung Javanese calendar reform.
 /// Gregorian 1633-07-08 = 1 Sura 1555 AJ = 1 Muharram 1043 AH.
 ///
-/// Computed via Meeus proleptic Gregorian algorithm (Astronomical Algorithms, Ch. 7).
-/// Cross-verified against Beauducel & Karjanto (2020), arXiv:2012.10064.
+/// Sources: Beauducel & Karjanto (2020), arXiv:2012.10064;
+///          Wikipedia "Javanese calendar" (verified March 2026).
 pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690;
 ```
 
 #### Dependency policy
 
-> **[Fix 3]** The crate `tanggalan` at `github.com/bect/tanggalan` described in v1 of this
-> spec does not exist on crates.io or GitHub as of March 2026. The only `tanggalan` repository
-> found (`mohamadrido/tanggalan`) is a JavaScript/HTML project with no Rust code.
->
-> **The `jawa` crate must be implemented independently.** Algorithmic sources:
-> - Dershowitz & Reingold, *Calendrical Calculations* (4th ed.), Ch. 10 "The Balinese Pawukon
->   Calendar" (for 210-day Pawukon shared with Balinese)
-> - Beauducel & Karjanto (2020), arXiv:2012.10064 (Wetonan congruence formula; verified
->   against physical implementation at `github.com/beaudu/weton`)
-> - Wikipedia "Javanese calendar" (cites H. Danudji, *Penanggalan Jawa 120 Tahun Kurup
->   Asapon*, Dahara Prize 2006, ISBN 979-501-454-4) for Kurup table
+No `tanggalan` crate exists in Rust on crates.io (as of March 2026). The only
+`tanggalan` repository found (`mohamadrido/tanggalan`) is JavaScript/HTML. The `jawa`
+module must be implemented independently.
+
+Algorithmic sources:
+- Beauducel & Karjanto (2020), arXiv:2012.10064 (Wetonan congruence formula)
+- Dershowitz & Reingold, *Calendrical Calculations* (4th ed.), Ch. 10 (Pawukon 210-day)
+- H. Danudji, *Penanggalan Jawa 120 Tahun Kurup Asapon*, Dahara Prize 2006 (Kurup table)
 
 Required cycles:
 - **Wetonan**: Saptawara (7) × Pasaran (5) = 35-day cycle; neptu values for both
-- **Pawukon**: 30-wuku × 7-day = 210-day cycle (shared with Balinese; reference
-  Dershowitz-Reingold Ch. 10 "The Balinese Pawukon Calendar")
-- **Windu**: 8-year cycle. Names in sequence: Alip, Ehe, Jimawal, Je, Dal, Be, Wawu, Jimakir.
-  Leap years within windu: Jimawal (355 days), Dal (355 days), Jimakir (355 days);
-  all others 354 days.
-- **Kurup**: 120-year cycle (15 windus). Current kurup = Alip Selasa Pon
-  (started 1936-03-24 CE = 1 Muharram 1355 AH, ends 2052-08-25 CE;
-  source: Wikipedia "Javanese calendar", citing H. Danudji 2006).
-- **Wuku**: same 30-wuku structure as Balinese but Javanese-language names
-- **Pranata Masa**: 12 agricultural seasons (solar-based, 12 × ~30 days).
-  Names: Kasa, Karo, Katelu, Kapat, Kalima, Kanem, Kapitu, Kawolu,
-  Kasongo, Kasepuluh, Desta, Sada.
-- **Dina Mulya**: noble days for Kejawen practitioners
+- **Pawukon**: 30-wuku × 7-day = 210-day cycle (Dershowitz-Reingold Ch. 10)
+- **Windu**: 8-year cycle. Names: Alip, Ehe, Jimawal, Je, Dal, Be, Wawu, Jimakir.
+  Leap years: Jimawal (355 days), Dal (355 days), Jimakir (355 days); others 354 days.
+- **Kurup**: 120-year cycle (15 windus). Current: Alip Selasa Pon,
+  started 1936-03-24, ends 2052-08-25 (Danudji 2006).
+- **Wuku**: same 30-wuku structure as Balinese; Javanese-language names
+- **Pranata Masa**: Kasa, Karo, Katelu, Kapat, Kalima, Kanem, Kapitu, Kawolu,
+  Kasongo, Kasepuluh, Desta, Sada (12 solar seasons)
 
-#### Windu year naming — clarification
+#### Windu year naming
 
-> **[Fix 5]** v1 of this spec incorrectly stated "current windu = Sancaya".
->
-> **"Sancaya" (also spelled Sangara, Sêngara) is a supra-windu group name, not a windu year
-> name.** Within the 120-year Kurup, windus are grouped into named sets at a higher hierarchy
-> level (e.g., "Kuntara", "Sengara", "Langkir", "Adi" in some traditional sources). These
-> group names appear in full almanac date notation alongside the individual windu year name.
->
-> The windu **year** name (position within the 8-year cycle) is one of the eight names listed
-> above. As of March 2026 (AJ ≈ 1959), the current windu year name is **Wawu** (7th position).
->
-> Implementations must:
-> 1. Expose the 8-name windu year cycle (`WinduYear` enum: `Alip` through `Jimakir`)
-> 2. Not conflate it with supra-windu group names, which are not algorithmically standardized
->    across sources and should be left to `stub!()` pending a citable primary source
+**"Sancaya" is not a Windu year name.** It is a supra-windu group name within the
+120-year Kurup hierarchy. The 8-name Windu year sequence is Alip through Jimakir.
+As of AJ ~1959 (March 2026), the current Windu year is **Wawu**.
 
 ```rust
-/// Position within the 8-year Windu cycle.
-/// Leap year (355 days) occurs in Jimawal, Dal, and Jimakir.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum WinduYear {
     Alip = 1,
@@ -235,18 +303,11 @@ impl WinduYear {
     pub fn is_leap(&self) -> bool {
         matches!(self, Self::Jimawal | Self::Dal | Self::Jimakir)
     }
-
-    /// Compute from Anno Javanico year number.
     pub fn from_aj(aj: u32) -> Self {
         match (aj - 1) % 8 {
-            0 => Self::Alip,
-            1 => Self::Ehe,
-            2 => Self::Jimawal,
-            3 => Self::Je,
-            4 => Self::Dal,
-            5 => Self::Be,
-            6 => Self::Wawu,
-            _ => Self::Jimakir,
+            0 => Self::Alip, 1 => Self::Ehe, 2 => Self::Jimawal,
+            3 => Self::Je,   4 => Self::Dal, 5 => Self::Be,
+            6 => Self::Wawu, _ => Self::Jimakir,
         }
     }
 }
@@ -254,209 +315,146 @@ impl WinduYear {
 
 ---
 
-### `hijriyah`
+### `hijriyah` module
 
-> **[Fix 2 — LICENSING BLOCKER]** — Full execution plan: `~/.windsurf/plans/hijriyah-implementation-a99a87.md`.
+**GPL-3.0 licensing blocker:** `misykat` v4.1.2 is GPL-3.0-only. Using it would force
+GPL-3.0 on `hijriyah`, `dewasa_engine`, and all downstream consumers, incompatible with
+the workspace's `MIT OR Apache-2.0` license.
 
-**Problem.** `misykat` v4.1.2 (GPL-3.0-only) cannot be a dependency. Pulling it in would force
-GPL-3.0-only on `hijriyah`, `dewasa-engine`, and downstream consumers, contradicting the workspace's
-`MIT OR Apache-2.0` license.
+**Resolution (Option A — selected):** Reimplement Hijri arithmetic independently from
+Dershowitz & Reingold Ch. 6 and Meeus Ch. 9. Do not read `misykat` source. Record
+the exclusion rationale in `hijriyah/DECISION.md`.
 
-**Decision (Option A).** Reimplement Hijri arithmetic independently from primary sources
-(Dershowitz & Reingold, *Calendrical Calculations* 4th ed. Ch. 6; Meeus, *Astronomical Algorithms* 2nd ed. Ch. 9).
-Record this in `hijriyah/DECISION.md` and cite both sources in `SOURCES.md`. Do **not** read misykat code.
-
-#### Design requirements
-
-- Crate metadata: `name = "hijriyah"`, version `0.2.0`, `edition = 2021`, `rust-version = 1.80`, `license = "MIT OR Apache-2.0"`.
-- Feature flags: `default = []`, `std`, `serde`, `wasm`. Must compile `no_std + alloc` when `std` is disabled.
-- Public API exposes `HijriDay`, `HijriMonth`, `Pasaran`, tabular vs government date distinction, Indonesian holidays, and haul computation.
-- Supported range: at least 1–1600 AH. Document behavior outside range (`CalendarError::OutOfRange`).
-- Documentation style: every public item gets the Islamic context docstring (Arabic + Indonesian name, epoch, sources).
-
-#### Implementation scope
-
-1. **Skeleton & gating**: `crates/hijriyah/` with `Cargo.toml`, `DECISION.md`, `SOURCES.md`, `src/lib.rs`, `arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`, `tests/anchors.rs`.
-   - `#![cfg_attr(not(feature = "std"), no_std)]`, `extern crate alloc`, `pub use` key types.
-2. **Core arithmetic**: Implement `hijri_to_jdn` / `jdn_to_hijri` using D-R Eq. 6.2–6.3 (Thursday epoch, JDN 1948439).
-   - Leap-year cycle: years {2,5,7,10,13,16,18,21,24,26,29} per 30-year block. Expose `HijriDay::is_leap_year`.
-3. **Types**: Build `HijriDay` struct with year/month/day, `HijriMonth` enum (Arabic + Indonesian names), `Pasaran` enum (Kliwon–Wage) using `(jdn + 2) % 5` formula.
-4. **Indonesian extensions**: Provide `maulid_jdn`, `isra_miraj_jdn`, `idul_fitri_jdn`, `idul_adha_jdn`, `haul_jdn` helpers (tabular arithmetic). No prayer-time logic.
-5. **Government date stub**: `indonesian_government_date()` returns `stub!("indonesian_government_date: requires Kemenag rukyat/hisab data; tabular approximation only. See https://sihat.kemenag.go.id")`.
-6. **Traits**: Implement `CalendarDate`/`CalendarMetadata` using `calendar-core`. Add metadata for epoch JDN, sources list, `reference_sources()` exposure.
-7. **Docs**: crate-level `//!` clarifying independent reimplementation, no misykat dependency, Apache-2.0 compatibility.
-
-#### Testing matrix
-
-- Anchor conversions: verify `hijri_to_jdn(1,1,1)=1948439`, `(...1043,1,1)=2317690`, `(...1355,1,1)=2428252`, `(...1446,1,1)=2460494`.
-- Holiday spot checks: `idul_fitri_jdn(y) == hijri_to_jdn(y, 10, 1)`, `maulid_jdn(1446) == hijri_to_jdn(1446, 3, 12)`.
-- Pasaran: `HijriDay::from_jdn(2317690)?.pasaran == Pasaran::Legi` (Jumat Legi).
-- Property test: 1000 random JDNs within 1–1600 AH round-trip through `jdn_to_hijri`/`hijri_to_jdn`.
-- Build-verification: `cargo build/test -p hijriyah --no-default-features` and `--target wasm32-unknown-unknown --no-default-features`.
-
-Prayer-time computation, rukyat modeling, and any dependency on `misykat`/`praytime-rs` remain out of scope.
+Design requirements:
+- `no_std + alloc` when `std` feature is disabled
+- Public API: `HijriDay`, `HijriMonth` (Arabic + Indonesian names), `Pasaran`
+- Tabular vs government date (`indonesian_government_date()` → `stub!()`)
+- Supported range: 1–1600 AH minimum
+- Anchor: `hijri_to_jdn(1, 1, 1) == 1948439` (Thursday epoch, D-R Eq. 6.2–6.3)
 
 ---
 
-### `chinese-nusantara`
+### `chinese_nusantara` module
 
-**Thin wrapper over `nongli` crate (v0.4.1, `github.com/supertsy5/nongli`, 7,639 total
-downloads as of March 2026).**
+Thin wrapper over `nongli` v0.4.1 (`github.com/supertsy5/nongli`, MIT license).
+**`std`-only** — `nongli` depends on `chrono` which requires `std`.
 
-Note: `nongli` depends on `chrono` with `std` features. This crate is therefore **`std`-only**
-and must declare this per Fix 4. The `no_std` requirement does not apply here.
+Peranakan-specific additions:
+- `Shio` enum (12-year zodiac, Indonesian names)
+- `cap_go_meh_jdn(chinese_year)` — 15th day, 1st month
+- `imlek_jdn(chinese_year)` — 1st day, 1st month
+- Weton Tionghoa (Pasaran intersection, same `(jdn + 2) % 5` formula as `hijriyah`)
+- Document Singkawang vs Solo/Semarang Cap Go Meh variants
 
-Add Peranakan (Chinese-Indonesian) context:
-- **Cap Go Meh** (15th day of 1st lunar month) — major Nusantara celebration
-- **Imlek** (Tahun Baru Imlek) — Indonesian national holiday since 2003
-- **Shio** (zodiac animal) — 12-year cycle; Indonesian-language names
-- **Weton Tionghoa**: intersection with Javanese Pasaran (in Peranakan practice)
-- Regional variants: note Singkawang (Kalimantan Barat) Cap Go Meh customs differ
-  from Solo and Semarang Peranakan traditions in auspiciousness interpretation
-
----
-
-### `batak`
-
-Batak traditional calendar is a lunar-star system — months counted by lunar phase,
-years determined by the Constellation of Orion and Scorpius within the new moon phase,
-yielding 12-month years and 13-month leap years.
-
-**Six Batak sub-groups have variants**: Toba, Karo, Simalungun, Pakpak/Dairi, Angkola,
-Mandailing. Core system is shared; variant divergences must be documented.
-
-Implement:
-- **Porhalaan**: the cylinder/book calendar artifact system — 12 months mapped to
-  lunar phases, with intercalary month rules keyed to Orion (Bintang Tiga / Waluku)
-  and Scorpius visibility
-- **Hara** (day names): Toba system has 30-day named cycle
-- **Datu system**: priest-computed auspiciousness for warding, healing, ritual timing
-- Month names (Toba): Sipaha Sada, Sipaha Dua, Sipaha Tolu, Sipaha Opat, Sipaha Lima,
-  Sipaha Onom, Sipaha Pitu, Sipaha Ualu, Sipaha Sia, Sipaha Sampulu, Hapungan, Hurung
-  (intercalary: Ihuthon)
-
-Primary source: "A Lunar-Star Calendar: Inquiry to the Traditional Batak Calendar" —
-preprints.org/manuscript/202404.0235 (2024, peer-reviewed preprint)
-Secondary: Schreiner, *Adat und Evangelium* (1972) — Porhalaan documentation
-
-**Implementation constraint**: Because Porhalaan leap year depends on heliacal observation
-(Orion/Scorpius), a purely algorithmic implementation requires the observer's latitude
-(Lake Toba: ~2.6°N). Expose `from_astronomical(jdn, lat, lon)` and a `tabular` fallback.
+License audit note: `nongli` v0.4.1 is MIT — compatible. Confirm via `cargo deny check`
+before publishing.
 
 ---
 
-### `sunda`
+### `batak` module
 
-Sundanese calendar is closely related to Javanese but predates the Sultan Agung reform:
-- **Kala Sunda**: pre-Islamic Sundanese Saka-derived system
-- **Pranatamangsa Sunda**: 12 agricultural seasons (parallel to Javanese Pranata Masa
-  but with different month names and slightly different solar epoch alignment)
-- **Sunda Wiwitan** ceremonial calendar: used by Baduy (Kanekes) community — strictly
-  oral tradition with no published algorithm; implement as `stub!()` with citation
-- Naga Tahun cycle (year-direction taboo system)
+Porhalaan: lunar-star system. 12-month years and 13-month leap years, keyed to
+Orion (Bintang Waluku) and Scorpius visibility.
 
----
+Dual-mode API (mandatory):
+```rust
+pub fn from_jdn_tabular(jdn: i64) -> Result<Self, CalendarError>;  // no_std
+#[cfg(feature = "astronomical")]
+pub fn from_jdn_astronomical(jdn: i64, lat: f64, lon: f64) -> Result<Self, CalendarError>;
+```
 
-### `bugis`
+Toba month names (12 + intercalary):
+Sipaha Sada, Sipaha Dua, Sipaha Tolu, Sipaha Opat, Sipaha Lima, Sipaha Onom,
+Sipaha Pitu, Sipaha Ualu, Sipaha Sia, Sipaha Sampulu, Hapungan, Hurung (intercalary: Ihuthon).
 
-- **Bugis lunar calendar**: Islamic-influenced but retains pre-Islamic 12-month names
-  (Rajab Bugis, etc.) with local intercalation rules
-- **Hari Tudang Sipulung**: annual farming consultation ritual — timing computed from
-  Pleiades (Bintang Kartika) visibility
-- **Siri' timing**: certain adat obligations computed from lunar phase
-- Note: Bugis calendar practices are partially documented in Pelras, *The Bugis* (1996)
+Primary source: "A Lunar-Star Calendar: Inquiry to the Traditional Batak Calendar",
+preprints.org/manuscript/202404.0235 (2024).
 
 ---
 
-### `sasak`
+### `sunda` module
 
-- **Sasak Rowot calendar**: new year determined by Pleiades (Bintang Rowot) first
-  appearance above eastern horizon — astronomical computation required (same approach
-  as Batak: observer-latitude-dependent)
-- **Bau Nyale**: annual sea worm festival — 10th month, specific lunar day
-- Month names: 12 months, Sasak-language
-- Source: Taufiq, et al. — documentation via Lombok traditional astronomy communities
+- Kala Sunda (pre-Islamic Saka-derived)
+- Pranatamangsa Sunda (12 agricultural seasons; different month names and solar epoch from Javanese)
+- Naga Tahun cycle (year-direction taboo)
+- Sunda Wiwitan ceremonial calendar → `stub!()` (Baduy oral tradition; cite Garna 1993)
 
 ---
 
-### `dayak`
+### `bugis` module
 
-- **Kaharingan agricultural calendar**: 12-month cycle keyed to Pleiades visibility
-  and rice-cultivation phases (land clearing → planting → harvest)
-- **Tewah** ritual timing: based on lunar phase and agricultural cycle
-- Sub-group variants: Ngaju, Iban, Kenyah, Kayan, Murut each have dialect variants
-  of month names; core cycle is shared
-- Primary source: Schärer, *Ngaju Religion* (1963); Miles, *Cutlass and Crescent Moon*
+- 12-month Islamic-influenced lunar calendar; pre-Islamic month names retained
+- `tudang_sipulung_jdn(year)` — Pleiades first rise, ~3°S; tabular fallback
+- Siri' timing via lunar phase
+- Source: Pelras, *The Bugis* (1996)
 
 ---
 
-### `toraja`
+### `sasak` module
 
-- **Toraja ritual calendar**: primarily organized around **Rambu Solo'** (death rituals)
-  and **Rambu Tuka'** (life/prosperity rituals) — the two poles of the Toraja cosmos
-- Timing of **Ma'nene'** (ancestral corpse-cleaning ceremony): August cycle, keyed to
-  post-harvest period
-- Month system: 12 lunar months; Toraja-language names
-- Agricultural phases: rice cultivation tied to lunar cycle
+- Rowot calendar: new year keyed to Pleiades (Bintang Rowot) first rise, Lombok ~8.6°S
+- `bau_nyale_jdn(year)` — 10th month, specific lunar day
+- Source: Taufiq et al. — Lombok traditional astronomy
+
+---
+
+### `dayak` module
+
+- Kaharingan 12-month agricultural cycle; Pleiades-keyed and rice-cultivation phases
+- Tewah ritual timing: lunar phase + agricultural cycle
+- `const` Ngaju month names; stub Kayan/Kenyah/Murut variants
+- Source: Schärer, *Ngaju Religion* (1963)
+
+---
+
+### `toraja` module
+
+- 12 lunar months; Toraja-language names
+- Rambu Solo' (death ritual) and Rambu Tuka' (life ritual) seasons
+- `manene_jdn(year)` — August cycle, post-harvest lunar phase
 - Source: Nooy-Palm, *The Sa'dan Toraja* Vol. 1 (1979)
 
 ---
 
-### `tengger`
+### `tengger` module
 
-- **Tengger calendar**: closest living relative of pre-Islamic Javanese Hindu calendar;
-  Tengger people of Bromo area did not convert to Islam, retaining Saka-based system
-- **Kasada** ceremony: 14th day of Kasada month (12th month), pilgrimage to Bromo crater
-  — this is the single most important computable date in the Tengger calendar
-- **Unan-unan**: 5-year purification cycle. This is **algorithmically distinct** from the
-  Javanese 8-year Windu and must not be conflated with it.
+- Closest living relative of pre-Islamic Javanese Hindu calendar; Saka-based
+- `kasada_jdn(tengger_year)` — 14th day, Kasada month (annual Bromo pilgrimage)
+- **Unan-unan**: 5-year purification cycle — distinct from Javanese Windu; do not conflate
 - Source: Hefner, *Hindu Javanese: Tengger Tradition and Islam* (1985)
 
 ---
 
-### `minangkabau`
+### `minangkabau` module
 
-- **Minangkabau calendar**: primarily Islamic (Hijriyah) with local agricultural overlay
-- **Turun ka sawah** (rice planting season): computed from combination of lunar month
-  and Pleiades visibility
-- **Hari Raya Adat**: distinct from Islamic Eid — local ceremonial new year
-- Matrilineal clan cycle: time-based obligations (not strictly a calendar but computable)
+- Primarily Islamic (Hijriyah) with agricultural overlay
+- `turun_ka_sawah_jdn(year)` — Pleiades visibility + lunar month, tabular fallback ~0°
+- `hari_raya_adat_jdn(year)` → `stub!()` with citation
 - Source: Kato, *Matriliny and Migration* (1982)
 
 ---
 
-### `dewasa-engine`
+### `dewasa_engine` module
 
-Cross-calendar auspiciousness correlator. Takes a Gregorian date and returns a unified
-structure containing all active calendar representations plus cross-system analysis.
-
-This crate is **`std`-only** (uses `HashMap`) and is explicitly exempt from the `no_std`
-requirement. Declare `std` as a hard dependency in `Cargo.toml`.
+**`std`-only** — uses `HashMap` for verdict aggregation. Explicitly exempt from `no_std`.
 
 ```rust
 pub struct NusantaraDay {
     pub gregorian: (i32, u8, u8),
     pub jdn: i64,
-
-    // Always computed
-    pub balinese: Option<balinese_calendar::BalineseDay>,
-    pub javanese: Option<jawa::JavaneseDay>,
+    pub balinese: Option<balinese::BalineseDate>,
+    pub jawa: Option<jawa::JavaneseDay>,
     pub hijriyah: Option<hijriyah::HijriDay>,
-    pub chinese: Option<chinese_nusantara::ChineseDay>,
-
-    // Computed if feature-flagged
-    pub batak: Option<batak::BatakDay>,
-    pub sunda: Option<sunda::SundaDay>,
-    // ... etc
-
+    pub chinese: Option<chinese_nusantara::ChineseNusantaraDay>,
+    // feature-gated ethnic modules...
     pub cross_auspiciousness: HashMap<Activity, CrossCalendarVerdict>,
 }
 
 pub struct CrossCalendarVerdict {
     pub overall: AuspiciousnessLevel,
     pub by_calendar: HashMap<&'static str, AuspiciousnessLevel>,
+    pub conflicts: Vec<CalendarConflict>,
     pub consensus_notes: Vec<&'static str>,
-    pub conflicts: Vec<CalendarConflict>, // e.g. auspicious in Bali, inauspicious in Jawa
 }
 ```
 
@@ -464,40 +462,39 @@ pub struct CrossCalendarVerdict {
 
 ## Technical Constraints
 
-| Crate | `no_std + alloc` | `std` required | Reason |
+| Module | `no_std + alloc` | `std` required | Reason |
 |---|---|---|---|
-| `calendar-core` | ✅ required | — | trait definitions, JDN math |
-| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | ✅ required | — | pure arithmetic (crate: https://crates.io/crates/balinese-calendar) |
-| `jawa` | ✅ required | — | pure arithmetic |
-| `hijriyah` | ✅ (Option A) | if Option B/C | depends on license choice |
-| `chinese-nusantara` | ❌ | ✅ | `nongli` → `chrono` requires `std` |
-| `batak` | ✅ (tabular feature) | `astronomical` feature | astronomical feature uses floating-point |
+| `calendar-core` | ✅ | — | trait definitions, JDN math |
+| [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) | ✅ | — | pure arithmetic |
+| `balinese` | ✅ | — | wraps no_std external crate |
+| `jawa` | ✅ | — | pure arithmetic |
+| `hijriyah` | ✅ | — | tabular arithmetic, Option A (independent) |
+| `chinese_nusantara` | ❌ | ✅ | `nongli` → `chrono` → `std` |
+| `batak` (tabular) | ✅ | — | const lookup tables |
+| `batak` (astronomical) | ❌ | ✅ | float math via `libm` |
 | `sunda`, `tengger`, `bugis`, `sasak`, `dayak`, `toraja`, `minangkabau` | ✅ | — | pure arithmetic / stubs |
-| `dewasa-engine` | ❌ | ✅ | `HashMap` aggregation |
+| `dewasa_engine` | ❌ | ✅ | `HashMap` aggregation |
 
-Additional constraints applying to all crates:
-- Rust edition 2021, MSRV 1.80+
+Additional constraints applying to all modules:
+- Rust edition 2021, MSRV 1.80
 - All static lookup tables as `const` — no runtime heap allocation for data
-- WASM32 target must compile (verified via `cargo build --target wasm32-unknown-unknown`)
-- Each crate independently publishable to crates.io
-- Feature flags: `serde`, `wasm`, `astronomical` (for observation-dependent calendars)
-- Every calendar crate implements `CalendarMetadata` from `calendar-core`
-- Where algorithm is unknown/unconfirmed, use `CalendarError::NotImplemented` via `stub!()` —
-  never silently fabricate data
-- Dependency policy: `misykat` is GPL-3.0 — see `hijriyah` section for resolution;
-  `nongli` v0.4.1 is the Chinese calendar dependency; audit license before publishing
+- WASM32 target must compile for all `no_std` modules
+- Feature flags: `serde`, `wasm`, `astronomical` (for observation-dependent modules)
+- Every calendar module implements `CalendarMetadata` from `calendar-core`
+- Where algorithm is unknown/unconfirmed, use `stub!()` — never silently fabricate data
 
 ---
 
-## Build Order (strict — each depends on previous)
+## Build Order (strict — each module depends on previous)
 
-1. `calendar-core` — traits, JDN math, error types, `stub!()` macro
-2. [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) (expansion from Prompt 1; published at https://crates.io/crates/balinese-calendar) + `jawa` + `hijriyah` + `chinese-nusantara`
-3. `batak` (most academically documented after Bali/Jawa)
-4. `sunda`, `tengger` (algorithmically close to Jawa/Bali)
-5. `bugis`, `sasak`, `dayak` (observation-dependent, partial stubs acceptable)
-6. `toraja`, `minangkabau` (Islamic overlay + partial stubs)
-7. `dewasa-engine` (depends on all above)
+1. `calendar-core` (published) — traits, JDN math, error types, `stub!()` macro
+2. `balinese` module (wraps external `balinese-calendar` v0.2.0)
+3. `jawa` module + `hijriyah` module + `chinese_nusantara` module
+4. `batak` module (most academically documented after Bali/Jawa)
+5. `sunda` module + `tengger` module (algorithmically close to Jawa/Bali)
+6. `bugis` module + `sasak` module + `dayak` module (observation-dependent, partial stubs)
+7. `toraja` module + `minangkabau` module (Islamic overlay + partial stubs)
+8. `dewasa_engine` module (depends on all above; `nusantara-calendar` v1.0 gate)
 
 ---
 
@@ -513,7 +510,7 @@ Every public struct/enum/fn must have:
 /// [Calendar name, ethnic group, region]
 ///
 /// # Sources
-/// - [Citable reference 1]
+/// - [Citable reference 1 with author, title, year, ISBN/DOI/URL]
 /// - [Citable reference 2]
 ```
 
