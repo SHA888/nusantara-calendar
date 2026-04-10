@@ -25,6 +25,12 @@
 use crate::{CalendarDate, CalendarError, CalendarMetadata, JDN};
 use calendar_core::stub;
 
+// no_std compatibility: import alloc types when std is not available
+#[cfg(not(feature = "std"))]
+extern crate alloc;
+#[cfg(not(feature = "std"))]
+use alloc::string::ToString;
+
 // ============================================================================
 // EPOCH CONSTANTS
 // ============================================================================
@@ -810,9 +816,16 @@ impl JavaneseDay {
 impl CalendarDate for JavaneseDay {
     fn from_jdn(jdn: JDN) -> Result<Self, CalendarError> {
         Self::from_jdn(jdn).ok_or_else(|| {
-            CalendarError::OutOfRange(format!(
-                "JDN {jdn} outside supported range {JDN_MIN}–{JDN_MAX}"
-            ))
+            #[cfg(feature = "std")]
+            {
+                CalendarError::OutOfRange(format!(
+                    "JDN {jdn} outside supported range {JDN_MIN}–{JDN_MAX}"
+                ))
+            }
+            #[cfg(not(feature = "std"))]
+            {
+                CalendarError::OutOfRange("JDN outside supported range".into())
+            }
         })
     }
 
@@ -826,10 +839,19 @@ impl CalendarDate for JavaneseDay {
 
     fn validate_range(&self) -> Result<(), CalendarError> {
         if self.aj_year < AJ_MIN || self.aj_year > AJ_MAX {
-            return Err(CalendarError::OutOfRange(format!(
-                "AJ {} outside {}–{}",
-                self.aj_year, AJ_MIN, AJ_MAX
-            )));
+            #[cfg(feature = "std")]
+            {
+                return Err(CalendarError::OutOfRange(format!(
+                    "AJ {} outside {}–{}",
+                    self.aj_year, AJ_MIN, AJ_MAX
+                )));
+            }
+            #[cfg(not(feature = "std"))]
+            {
+                return Err(CalendarError::OutOfRange(
+                    "AJ year outside supported range".into(),
+                ));
+            }
         }
         Ok(())
     }

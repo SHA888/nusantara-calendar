@@ -182,7 +182,8 @@ Each release is a Git tag on `main`. All items are checklist tasks.
       *Created SOURCES.md with verification legend, jawa module entry, algorithm-to-source mapping, and confidence assessment*
 - [x] `[impl]` Implement `CalendarDate` for `JavaneseDay` (stub — returns NotImplemented for unconverted dates)
 - [x] `[impl]` Implement `CalendarMetadata` for `JavaneseDay` (done)
-- [ ] `[impl]` Gate `no_std` correctly within module
+- [x] `[impl]` Gate `no_std` correctly within module
+      *Removed `std` requirement from `jawa` feature; added `#[cfg(feature = "std")]` gates for `format!` macros; added `alloc` imports for `no_std` compatibility*
 - [x] `[test]` Known anchor: JDN 2317690 → 1 Sura 1555 AJ, Jumat Legi, wuku Sinta pos 1
       *Implemented in `known_anchor_epoch` test - all values verified*
 - [x] `[test]` Known anchor: 1945-08-17 (Proklamasi) → Jumat Legi

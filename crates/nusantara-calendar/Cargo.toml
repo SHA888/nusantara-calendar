@@ -31,7 +31,7 @@ wasm = ["calendar-core/wasm-bindgen", "wasm-bindgen"]
 
 # Calendar system features
 balinese = ["balinese-calendar"]
-jawa = ["std"]
+jawa = []
 hijriyah = ["std"]
 batak = ["std"]
 sunda = ["std"]
