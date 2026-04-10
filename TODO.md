@@ -172,7 +172,8 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 - [x] `[impl]` Implement Wulan (lunar month) arithmetic from JDN using tabular cycle
       *Iterative year/month lookup with leap year handling*
 - [x] `[impl]` Implement `WinduYear::from_aj()` (done); full `JavaneseYear` from AJ number stubbed
-- [ ] `[impl]` Implement Pranata Masa from JDN (solar position relative to ~April 22 epoch)
+- [x] `[impl]` Implement Pranata Masa from JDN (solar position relative to ~June 21 solstice/Kasa)
+      *Formula: `(jdn - KASA_REF).rem_euclid(365)` → lookup in `PRANATA_MASA_SOLAR_OFFSETS`*
 - [x] `[impl]` Implement `KurupRecord` with `KURUP_ASAPON_START_JDN` and `KURUP_ASAPON_END_JDN`
       annotated with source-tier doc comments (Danudji 2006 primary, cross-validated)
 - [ ] `[impl]` Stub supra-windu group names with citation (Danudji 2006)

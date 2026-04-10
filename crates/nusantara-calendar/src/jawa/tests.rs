@@ -149,6 +149,36 @@ fn windu_cycle_length() {
 }
 
 // ============================================================================
+// PRANATA MASA (SOLAR SEASONS)
+// ============================================================================
+
+#[test]
+fn pranata_masa_from_jdn_epoch() {
+    // Epoch (1633-07-08 = JDN 2317690) is about 18 days after June 21
+    // So it should be in Kasa (first ~30 days after solstice)
+    let pos = pranata_masa_from_jdn(SULTAN_AGUNG_EPOCH_JDN);
+    assert_eq!(pos, 0, "Epoch should be in Kasa (position 0), got {pos}");
+}
+
+#[test]
+fn pranata_masa_cycle() {
+    // Verify that Pranata Masa cycles every ~365 days
+    let jdn1 = 2_500_000;
+    let pos1 = pranata_masa_from_jdn(jdn1);
+
+    // After 365 days, should be in the same season
+    let pos2 = pranata_masa_from_jdn(jdn1 + 365);
+    assert_eq!(pos1, pos2, "Pranata Masa should repeat after 365 days");
+}
+
+#[test]
+fn pranata_masa_name_lookup() {
+    assert_eq!(pranata_masa_name(0), "Kasa");
+    assert_eq!(pranata_masa_name(1), "Karo");
+    assert_eq!(pranata_masa_name(11), "Sada");
+}
+
+// ============================================================================
 // DINA MULYA
 // ============================================================================
 

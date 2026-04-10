@@ -366,6 +366,54 @@ pub const PRANATA_MASA_SOLAR_OFFSETS: [u16; 12] = [
     336, // Sada
 ];
 
+/// Length of solar year in days (approximate for Pranata Masa calculation).
+/// Uses 365 days as a fixed approximation.
+pub const PRANATA_MASA_SOLAR_YEAR_DAYS: u16 = 365;
+
+/// Reference JDN for Kasa start (June solstice, ~June 21).
+/// JDN 2317672 corresponds to 1633-06-21, approximately the first Kasa
+/// before the Sultan Agung epoch.
+pub const PRANATA_MASA_KASA_REFERENCE_JDN: i64 = 2_317_672;
+
+/// Compute Pranata Masa position from JDN.
+///
+/// The Pranata Masa are 12 solar-based agricultural seasons.
+/// Kasa (0) starts at ~June solstice, with each season approximately 30 days.
+///
+/// Algorithm:
+/// 1. Calculate days since Kasa reference
+/// 2. Modulo by solar year length (365 days)
+/// 3. Find the season based on `PRANATA_MASA_SOLAR_OFFSETS`
+///
+/// Source: Traditional Javanese agricultural calendar; solar positions
+/// approximate and vary slightly year-to-year.
+#[must_use]
+#[allow(clippy::cast_possible_truncation)]
+pub fn pranata_masa_from_jdn(jdn: i64) -> PranataMasaPos {
+    // Calculate days since Kasa reference
+    let days_since_kasa = jdn - PRANATA_MASA_KASA_REFERENCE_JDN;
+
+    // Get day within solar year (0-364)
+    let day_in_year = days_since_kasa.rem_euclid(i64::from(PRANATA_MASA_SOLAR_YEAR_DAYS)) as u16;
+
+    // Find the Pranata Masa based on offsets (binary search would be faster,
+    // but linear search is fine for 12 elements)
+    for (idx, &offset) in PRANATA_MASA_SOLAR_OFFSETS.iter().enumerate().rev() {
+        if day_in_year >= offset {
+            return idx as u8;
+        }
+    }
+
+    // Fallback to Kasa (shouldn't reach here with valid offsets)
+    0
+}
+
+/// Get the name of a Pranata Masa position.
+#[must_use]
+pub const fn pranata_masa_name(pos: PranataMasaPos) -> &'static str {
+    PRANATA_MASA_NAMES[pos as usize]
+}
+
 // ============================================================================
 // DINA MULYA (NOBLE DAYS)
 // ============================================================================
