@@ -228,7 +228,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [TODO.md](TODO.md) for implementation
 
 ## Acknowledgements
 
-- Beauducel & Karjanto (2020), *An ethnoarithmetic excursion into the Javanese calendar*, arXiv:2012.10064
+- Karjanto & Beauducel (2020), *An ethnoarithmetic excursion into the Javanese calendar*, arXiv:2012.10064
 - Dershowitz & Reingold, *Calendrical Calculations* (4th ed.) - JDN pivot and Pawukon algorithm
 - [`balinese-calendar`](https://github.com/SHA888/balinese-calendar) crate - Official Balinese Saka calendar implementation
 - Various Indonesian cultural authorities and academic sources for each calendar system

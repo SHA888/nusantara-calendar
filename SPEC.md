@@ -253,7 +253,7 @@ that wraps `balinese_calendar::BalineseDate`.
 /// Epoch of the Sultan Agung Javanese calendar reform.
 /// Gregorian 1633-07-08 = 1 Sura 1555 AJ = 1 Muharram 1043 AH.
 ///
-/// Sources: Beauducel & Karjanto (2020), arXiv:2012.10064;
+/// Sources: Karjanto & Beauducel (2020), arXiv:2012.10064;
 ///          Wikipedia "Javanese calendar" (verified March 2026).
 pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690;
 ```
@@ -265,7 +265,7 @@ No `tanggalan` crate exists in Rust on crates.io (as of March 2026). The only
 module must be implemented independently.
 
 Algorithmic sources:
-- Beauducel & Karjanto (2020), arXiv:2012.10064 (Wetonan congruence formula)
+- Karjanto & Beauducel (2020), arXiv:2012.10064 (Wetonan congruence formula)
 - Dershowitz & Reingold, *Calendrical Calculations* (4th ed.), Ch. 10 (Pawukon 210-day)
 - H. Danudji, *Penanggalan Jawa 120 Tahun Kurup Asapon*, Dahara Prize 2006 (Kurup table)
 

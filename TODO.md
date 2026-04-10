@@ -148,33 +148,43 @@ Each release is a Git tag on `main`. All items are checklist tasks.
 
 ### `jawa` module
 
-- [ ] `[arch]` Confirm independent implementation — `jawa` module has no external calendar dependency; all Javanese arithmetic implemented directly from cited sources
+- [x] `[arch]` Confirm independent implementation — no Rust Javanese calendar crate exists on crates.io; existing implementations are MATLAB/Perl/C (`beaudu/weton`) and JS/TS (`kalenderjawa` org); primary source confirmed: Karjanto & Beauducel (2020), arXiv:2012.10064
 - [ ] `[arch]` Map all required cycles to data types:
       Wetonan → `(SaptawaraPos, PasaranPos)`, Pawukon → `WukuPos`, Windu → `WinduYear` enum,
       Kurup → `KurupRecord`, Pranata Masa → `PranataMasaPos`
 - [ ] `[arch]` Specify supported year range: AJ 1555–2474 (Gregorian 1633–2169, spans 2 kurups)
 - [ ] `[impl]` Implement `src/jawa/mod.rs` within `nusantara-calendar`
 - [ ] `[impl]` Define `pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2317690`
-      (cite: Beauducel & Karjanto 2020, arXiv:2012.10064)
+      (cite: Karjanto & Beauducel 2020, arXiv:2012.10064)
 - [ ] `[impl]` Implement `WinduYear` enum with `from_aj(u32)` and `is_leap()` methods
 - [ ] `[impl]` Implement `const` Pasaran names array (5 entries, ngoko + krama)
 - [ ] `[impl]` Implement `const` Saptawara names array (7 entries) with neptu values
 - [ ] `[impl]` Implement `const` Wuku names array (30 entries, Javanese-language)
 - [ ] `[impl]` Implement `const` Pranata Masa names array (12 entries) with solar epoch offsets
 - [ ] `[impl]` Implement `const` Dina Mulya table
-- [ ] `[impl]` Implement Wetonan computation from JDN (Beauducel-Karjanto congruence formula)
+- [ ] `[impl]` Implement Wetonan computation from JDN (Karjanto-Beauducel congruence formula)
 - [ ] `[impl]` Implement Pawukon (210-day) position from JDN (D-R Ch. 10 algorithm)
 - [ ] `[impl]` Implement Wulan (lunar month) arithmetic from JDN using tabular Hijri cycle
 - [ ] `[impl]` Implement `WinduYear::from_aj()` and full `JavaneseYear` from AJ number
 - [ ] `[impl]` Implement Pranata Masa from JDN (solar position relative to ~April 22 epoch)
-- [ ] `[impl]` Implement `KurupRecord` (current: Alip Selasa Pon, 1936-03-24 → 2052-08-25)
+- [ ] `[impl]` Implement `KurupRecord` (current: Alip Selasa Pon, 1936-03-24 → 2052-08-25);
+      annotate `KURUP_ASAPON_START_JDN` and `KURUP_ASAPON_END_JDN` with source-tier doc comment:
+      primary = Danudji (2006) ISBN 979-501-454-4 (print-only); cross-validated against
+      Wikipedia "Javanese calendar" + `beaudu/weton`; confidence tier HIGH (triangulated)
 - [ ] `[impl]` Stub supra-windu group names with citation (Danudji 2006)
+- [ ] `[doc]` Add `jawa` entry to workspace `SOURCES.md` with verification-tier table:
+      Karjanto & Beauducel (2020) ✅ primary + digitally verifiable;
+      Dershowitz & Reingold (4th ed.) ✅ primary + widely cited;
+      Danudji (2006) ⚠️ primary, print-only, triangulation required;
+      Wikipedia + `beaudu/weton` ℹ️ cross-check only
 - [ ] `[impl]` Implement `CalendarDate` for `JavaneseDay`
 - [ ] `[impl]` Implement `CalendarMetadata` for `JavaneseDay`
 - [ ] `[impl]` Gate `no_std` correctly within module
 - [ ] `[test]` Known anchor: JDN 2317690 → 1 Sura 1555 AJ, Jumat Legi, wuku Sinta pos 1
 - [ ] `[test]` Known anchor: 1945-08-17 (Proklamasi) → Jumat Legi (verify historical record)
-- [ ] `[test]` Kurup boundary: 1936-03-24 → Selasa Pon, Alip year
+- [ ] `[test]` Kurup boundary: 1936-03-24 → Selasa Pon, Alip year — validate against all three
+      sources independently: (1) Danudji (2006) table, (2) Wikipedia "Javanese calendar",
+      (3) `beaudu/weton` output at same JDN; all three must agree before test is marked passing
 - [ ] `[test]` Windu year: `WinduYear::from_aj(1959) == WinduYear::Wawu`
 - [ ] `[test]` Round-trip: 500 random JDNs within AJ 1555–2474
 - [ ] `[test]` `--no-default-features` + WASM build check
