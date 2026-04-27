@@ -627,7 +627,9 @@ pub trait HasAuspiciousness {
 #[macro_export]
 macro_rules! stub {
     ($msg:expr) => {
-        return Err(CalendarError::NotImplemented($msg.to_string()))
+        return Err($crate::CalendarError::NotImplemented(
+            ::alloc::string::ToString::to_string(&$msg),
+        ))
     };
 }
 
@@ -695,16 +697,15 @@ pub fn jdn_to_gregorian(jdn: JDN) -> (i32, u8, u8) {
         i32::MAX
     );
 
-    // Fliegel & van Flandern algorithm (1968)
+    // Fliegel & van Flandern algorithm (1968), all intermediates in i64
+    // to avoid overflow for JDNs in the upper half of the i32 range.
     // Reference: U.S. Naval Observatory
-    #[allow(clippy::cast_possible_truncation)]
-    let jd = jdn as i32;
-    let l = jd + 68_569;
-    let n = (4 * l) / 146_097;
+    let l = jdn + 68_569_i64;
+    let n = (4 * l) / 146_097_i64;
     let l = l - (146_097 * n + 3) / 4;
-    let i = (4_000 * (l + 1)) / 1_461_001;
+    let i = (4_000 * (l + 1)) / 1_461_001_i64;
     let l = l - (1_461 * i) / 4 + 31;
-    let j = (80 * l) / 2_447;
+    let j = (80 * l) / 2_447_i64;
     let day = l - (2_447 * j) / 80;
     let l = j / 11;
     let month = j + 2 - 12 * l;
@@ -719,7 +720,7 @@ pub fn jdn_to_gregorian(jdn: JDN) -> (i32, u8, u8) {
 
     #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
     {
-        (year, month as u8, day as u8)
+        (year as i32, month as u8, day as u8)
     }
 }
 

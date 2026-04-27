@@ -42,9 +42,9 @@ use alloc::string::ToString;
 ///          Wikipedia "Javanese calendar" (verified March 2026).
 pub const SULTAN_AGUNG_EPOCH_JDN: i64 = 2_317_690;
 
-/// Maximum supported JDN (AJ 2474-12-30 ≈ 2169 CE).
-/// Calculated: 2 kurups × 120 years × 354.375 days/year average.
-pub const JDN_MAX: i64 = 2_766_190;
+/// Maximum supported JDN (last day of AJ 2474 ≈ 2169 CE).
+/// Calculated: sum of `WinduYear::days_in_year()` over AJ 1555–2474 = 326,025 days.
+pub const JDN_MAX: i64 = 2_643_714;
 
 /// Start of current Kurup Asapon (Alip Selasa Pon).
 /// Gregorian 1936-03-24 = JDN `2_428_252` (calculated from epoch + `110_562` days).
@@ -54,11 +54,11 @@ pub const JDN_MAX: i64 = 2_766_190;
 pub const KURUP_ASAPON_START_JDN: i64 = 2_428_252;
 
 /// End of current Kurup Asapon.
-/// Gregorian 2052-08-25 = JDN `2_474_846` (120 years × ~354.4 days/year from start).
+/// Gregorian 2052-08-26 = JDN `2_470_776` = `KURUP_ASAPON_START_JDN` + `KURUP_LENGTH_DAYS` − 1.
 ///
 /// Primary source: Danudji (2006).
 /// Cross-validated: Wikipedia + `beaudu/weton`.
-pub const KURUP_ASAPON_END_JDN: i64 = 2_474_846;
+pub const KURUP_ASAPON_END_JDN: i64 = 2_470_776;
 
 // ============================================================================
 // SUPPORTED YEAR RANGE

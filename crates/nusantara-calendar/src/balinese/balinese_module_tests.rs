@@ -28,27 +28,32 @@ mod tests {
 
     #[test]
     fn test_calendar_metadata_trait() {
-        assert_eq!(BalineseDate::epoch(), 2_461_119); // March 19, 2026 (approximate)
-        assert_eq!(BalineseDate::cycle_length(), Some(210)); // Pawukon cycle
+        assert_eq!(BalineseDate::epoch(), 1_749_630); // Saka epoch: proleptic Gregorian 78-03-22
+        assert_eq!(BalineseDate::cycle_length(), None); // No year-level cycle
         assert!(!BalineseDate::description().is_empty());
         assert!(!BalineseDate::cultural_origin().is_empty());
     }
 
     #[test]
-    fn test_auspiciousness_trait() {
+    fn test_auspiciousness_trait_panics() {
         let date = BalineseDate::from_ymd(2026, 3, 19).unwrap();
 
-        // Test specific activity auspiciousness
-        let marriage_auspiciousness = date.auspiciousness_for(&calendar_core::Activity::Marriage);
-        assert!(matches!(
-            marriage_auspiciousness,
-            calendar_core::AuspiciousnessLevel::Neutral
-        ));
+        // auspiciousness_for is not yet implemented — must panic
+        let date_clone = date.clone();
+        let result = std::panic::catch_unwind(move || {
+            date_clone.auspiciousness_for(&calendar_core::Activity::Marriage)
+        });
+        assert!(
+            result.is_err(),
+            "auspiciousness_for should panic (unimplemented)"
+        );
 
-        // Test general auspiciousness
-        let is_auspicious = date.is_auspicious_day();
-        // Should be either true or false, not panic
-        let _ = is_auspicious;
+        // is_auspicious_day is not yet implemented — must panic
+        let result = std::panic::catch_unwind(move || date.is_auspicious_day());
+        assert!(
+            result.is_err(),
+            "is_auspicious_day should panic (unimplemented)"
+        );
     }
 
     #[test]

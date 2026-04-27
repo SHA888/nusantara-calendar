@@ -90,13 +90,15 @@ impl CalendarDate for BalineseDate {
 
 impl CalendarMetadata for BalineseDate {
     fn epoch() -> JDN {
-        // Use a reasonable epoch based on the official crate's data
-        // This would need to be calculated from the official crate's epoch
-        2_461_119 // March 19, 2026 (approximate)
+        // Saka era epoch: proleptic Gregorian 78-03-22 (= Julian 78-03-22)
+        // Source: Dershowitz & Reingold, *Calendrical Calculations* (4th ed.), §13.1
+        1_749_630
     }
 
     fn cycle_length() -> Option<calendar_core::CycleYear> {
-        Some(210) // Pawukon cycle length
+        // The Balinese Saka year has no fixed year-level cycle.
+        // Pawukon (210 days) is a sub-year day cycle, not measured in years.
+        None
     }
 
     fn description() -> &'static str {
@@ -113,14 +115,11 @@ impl HasAuspiciousness for BalineseDate {
     type AuspiciousnessLevel = AuspiciousnessLevel;
 
     fn auspiciousness_for(&self, _activity: &Self::Activity) -> Self::AuspiciousnessLevel {
-        // Simplified auspiciousness calculation
-        // In a full implementation, this would delegate to the official crate's calculation
-        AuspiciousnessLevel::Neutral
+        unimplemented!("Balinese auspiciousness_for: not yet implemented")
     }
 
     fn is_auspicious_day(&self) -> bool {
-        // Simplified auspiciousness check
-        false
+        unimplemented!("Balinese is_auspicious_day: not yet implemented")
     }
 }
 

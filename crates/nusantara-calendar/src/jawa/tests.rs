@@ -14,7 +14,7 @@ fn sultan_agung_epoch_matches_expected() {
 #[test]
 fn kurup_asapon_boundaries() {
     assert_eq!(KURUP_ASAPON_START_JDN, 2_428_252);
-    assert_eq!(KURUP_ASAPON_END_JDN, 2_474_846);
+    assert_eq!(KURUP_ASAPON_END_JDN, 2_470_776);
     assert_eq!(KURUP_ASAPON.start_aj, 1868);
     assert_eq!(KURUP_ASAPON.end_aj, 1987);
 }
@@ -24,7 +24,7 @@ fn supported_year_range() {
     assert_eq!(AJ_MIN, 1555);
     assert_eq!(AJ_MAX, 2474);
     assert_eq!(JDN_MIN, SULTAN_AGUNG_EPOCH_JDN);
-    assert_eq!(JDN_MAX, 2_766_190);
+    assert_eq!(JDN_MAX, 2_643_714);
 }
 
 // ============================================================================
