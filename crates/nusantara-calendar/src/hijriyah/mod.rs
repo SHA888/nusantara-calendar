@@ -106,7 +106,10 @@ pub const MONTH_NAMES: [&str; 12] = [
 #[must_use]
 pub const fn is_leap_year(year: u32) -> bool {
     let year_in_cycle = ((year - 1) % 30) + 1;
-    matches!(year_in_cycle, 2 | 5 | 7 | 10 | 13 | 16 | 18 | 21 | 24 | 26 | 29)
+    matches!(
+        year_in_cycle,
+        2 | 5 | 7 | 10 | 13 | 16 | 18 | 21 | 24 | 26 | 29
+    )
 }
 
 /// Count leap years from year 1 up to (but not including) the given year
@@ -174,11 +177,7 @@ pub const fn days_in_month(month: u8, year: u32) -> u8 {
 /// 354 days for common years, 355 days for leap years
 #[must_use]
 pub const fn days_in_year(year: u32) -> u16 {
-    if is_leap_year(year) {
-        355
-    } else {
-        354
-    }
+    if is_leap_year(year) { 355 } else { 354 }
 }
 
 /// Convert Hijri date to Julian Day Number
@@ -245,7 +244,7 @@ pub const fn hijri_to_jdn(year: u32, month: u8, day: u8) -> i64 {
 /// # Sources
 /// - Dershowitz & Reingold (2018), Ch. 6, Eq. 6.3
 pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
-    if jdn < JDN_MIN || jdn > JDN_MAX {
+    if !(JDN_MIN..=JDN_MAX).contains(&jdn) {
         let msg = {
             #[cfg(feature = "std")]
             {
@@ -267,7 +266,7 @@ pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
     let mut year = HIJRI_YEAR_MIN;
 
     loop {
-        let year_length = days_in_year(year) as i64;
+        let year_length = i64::from(days_in_year(year));
 
         if days_remaining < year_length {
             // We've found the correct year
@@ -295,7 +294,7 @@ pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
     // Find the month
     let mut month = 1u8;
     loop {
-        let month_length = days_in_month(month, year) as i64;
+        let month_length = i64::from(days_in_month(month, year));
 
         if days_remaining < month_length {
             // We've found the correct month
@@ -314,13 +313,14 @@ pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
     }
 
     // The remaining days + 1 = day of month
-    let day = (days_remaining + 1) as u8;
-
-    if day < 1 || day > 30 {
+    let Some(day) = u8::try_from(days_remaining + 1)
+        .ok()
+        .filter(|&d| (1..=30).contains(&d))
+    else {
         let msg = {
             #[cfg(feature = "std")]
             {
-                format!("Invalid day: {day}")
+                format!("Invalid day: {}", days_remaining + 1)
             }
             #[cfg(not(feature = "std"))]
             {
@@ -328,7 +328,7 @@ pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
             }
         };
         return Err(CalendarError::InvalidParameters(msg));
-    }
+    };
 
     Ok((year, month, day))
 }
@@ -356,7 +356,7 @@ pub struct HijriDate {
 }
 
 impl HijriDate {
-    /// Create a HijriDate from year, month, and day
+    /// Create a `HijriDate` from year, month, and day
     ///
     /// # Arguments
     /// * `year` - Hijri year (1–1600)
@@ -376,7 +376,7 @@ impl HijriDate {
         if day < 1 || day > 30 {
             return None;
         }
-        Some(HijriDate { year, month, day })
+        Some(Self { year, month, day })
     }
 
     /// Get the month name (transliterated)
@@ -403,7 +403,7 @@ impl HijriDate {
 impl CalendarDate for HijriDate {
     fn from_jdn(jdn: JDN) -> Result<Self, CalendarError> {
         let (year, month, day) = jdn_to_hijri(jdn)?;
-        Ok(HijriDate { year, month, day })
+        Ok(Self { year, month, day })
     }
 
     fn to_jdn(&self) -> JDN {
@@ -419,7 +419,10 @@ impl CalendarDate for HijriDate {
             let msg = {
                 #[cfg(feature = "std")]
                 {
-                    format!("Hijri year {0} outside range {1}–{2}", self.year, HIJRI_YEAR_MIN, HIJRI_YEAR_MAX)
+                    format!(
+                        "Hijri year {0} outside range {1}–{2}",
+                        self.year, HIJRI_YEAR_MIN, HIJRI_YEAR_MAX
+                    )
                 }
                 #[cfg(not(feature = "std"))]
                 {
@@ -491,7 +494,11 @@ mod tests {
     #[test]
     fn test_hijri_epoch() {
         // 1 Muharram 1 AH should be JDN 1948439
-        let hijri = HijriDate { year: 1, month: 1, day: 1 };
+        let hijri = HijriDate {
+            year: 1,
+            month: 1,
+            day: 1,
+        };
         assert_eq!(hijri.to_jdn(), 1_948_439);
 
         // Verify reverse conversion
@@ -503,7 +510,11 @@ mod tests {
     fn test_hijri_anchor_1043() {
         // 1 Muharram 1043 AH = JDN 2317690 (1 July 1633 CE, Sultan Agung epoch)
         // This is a critical anchor point that syncs with the Javanese calendar
-        let hijri = HijriDate { year: 1043, month: 1, day: 1 };
+        let hijri = HijriDate {
+            year: 1043,
+            month: 1,
+            day: 1,
+        };
         let jdn = hijri.to_jdn();
         assert_eq!(jdn, 2_317_690, "1 Muharram 1043 AH should be JDN 2317690");
 
@@ -515,7 +526,11 @@ mod tests {
     #[test]
     fn test_hijri_anchor_1355() {
         // 1 Muharram 1355 AH = JDN 2428252
-        let hijri = HijriDate { year: 1355, month: 1, day: 1 };
+        let hijri = HijriDate {
+            year: 1355,
+            month: 1,
+            day: 1,
+        };
         assert_eq!(hijri.to_jdn(), 2_428_252);
 
         let from_jdn = HijriDate::from_jdn(2_428_252).unwrap();
@@ -525,7 +540,11 @@ mod tests {
     #[test]
     fn test_hijri_anchor_1446() {
         // 1 Muharram 1446 AH = JDN 2460494 (July 7, 2024 CE)
-        let hijri = HijriDate { year: 1446, month: 1, day: 1 };
+        let hijri = HijriDate {
+            year: 1446,
+            month: 1,
+            day: 1,
+        };
         assert_eq!(hijri.to_jdn(), 2_460_494);
 
         let from_jdn = HijriDate::from_jdn(2_460_494).unwrap();
@@ -540,7 +559,10 @@ mod tests {
         for year_in_cycle in 1..=30 {
             let is_leap = is_leap_year(year_in_cycle);
             let expected = leap_positions.contains(&year_in_cycle);
-            assert_eq!(is_leap, expected, "Year {year_in_cycle} leap status mismatch");
+            assert_eq!(
+                is_leap, expected,
+                "Year {year_in_cycle} leap status mismatch"
+            );
         }
 
         // Also test years in the next cycle
@@ -569,7 +591,11 @@ mod tests {
         }
 
         let leap_year = 2; // Year 2 is leap
-        assert_eq!(days_in_month(12, leap_year), 30, "Month 12 should have 30 days in leap year");
+        assert_eq!(
+            days_in_month(12, leap_year),
+            30,
+            "Month 12 should have 30 days in leap year"
+        );
     }
 
     #[test]
@@ -592,7 +618,7 @@ mod tests {
             let hijri = HijriDate { year, month, day };
             let jdn = hijri.to_jdn();
             let back = HijriDate::from_jdn(jdn).unwrap();
-            assert_eq!(hijri, back, "Round-trip failed for {}-{}-{}", year, month, day);
+            assert_eq!(hijri, back, "Round-trip failed for {year}-{month}-{day}");
         }
     }
 }

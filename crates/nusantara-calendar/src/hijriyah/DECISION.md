@@ -2,8 +2,8 @@
 
 ## Decision 1: GPL-3.0 Library Exclusion (Option A)
 
-**Date:** 2026-05-22  
-**Status:** ✓ Approved & Implemented  
+**Date:** 2026-05-22
+**Status:** ✓ Approved & Implemented
 **Decision:** Exclude GPL-3.0 and other copyleft dependencies; reimplement Hijri arithmetic independently.
 
 ### Context
@@ -82,14 +82,14 @@ gregorian ←→ jdn ←→ hijri
 
 ## Implementation Checkpoints
 
-✓ Decision documented  
-⏳ Module structure defined (`arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`)  
-⏳ Algorithms implemented from D-R Ch. 6 + Meeus Ch. 9  
-⏳ Anchor tests passing (1 Muharram 1 AH, 1043 AH, 1355 AH, 1446 AH)  
-⏳ Round-trip tests (1000 random JDNs, 1–1600 AH range)  
-⏳ `CalendarDate` + `CalendarMetadata` trait implementations  
+✓ Decision documented
+⏳ Module structure defined (`arithmetic.rs`, `types.rs`, `holidays.rs`, `metadata.rs`)
+⏳ Algorithms implemented from D-R Ch. 6 + Meeus Ch. 9
+⏳ Anchor tests passing (1 Muharram 1 AH, 1043 AH, 1355 AH, 1446 AH)
+⏳ Round-trip tests (1000 random JDNs, 1–1600 AH range)
+⏳ `CalendarDate` + `CalendarMetadata` trait implementations
 
 ---
 
-**Approved by:** Architecture review (embedded in project spec)  
+**Approved by:** Architecture review (embedded in project spec)
 **Next task:** 1.2 — Implement `hijri_to_jdn` and `jdn_to_hijri` per D-R Eq. 6.2–6.3
