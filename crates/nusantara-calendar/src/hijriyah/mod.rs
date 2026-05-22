@@ -193,7 +193,7 @@ pub const fn days_in_year(year: u32) -> u16 {
 /// Julian Day Number
 ///
 /// # Algorithm
-/// Days since epoch = (days in previous years) + (days in previous months) + day
+/// Days since epoch = (days in previous years) + (days in previous months) + (day - 1)
 /// - Days in previous years: 354 * (year - 1) + (leap years before this year)
 /// - Days in previous months: sum of days in months 1 to (month - 1)
 ///
@@ -216,10 +216,8 @@ pub const fn hijri_to_jdn(year: u32, month: u8, day: u8) -> i64 {
     }
 
     // Combine all components
-    // JDN = EPOCH + (days from start of epoch to this date)
-    // Days are: previous complete years (354*n + leap_adjustment) + previous complete months + day - 1
-    let total_days = days_in_years + leap_years + days_in_months + (day as i64);
-    HIJRI_EPOCH_JDN + total_days - 1
+    let total_days = days_in_years + leap_years + days_in_months + (day as i64) - 1;
+    HIJRI_EPOCH_JDN + total_days
 }
 
 /// Convert Julian Day Number to Hijri date
