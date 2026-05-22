@@ -56,9 +56,9 @@ pub const HIJRI_YEAR_MAX: u32 = 1600;
 /// Minimum supported JDN (year 1 AH)
 pub const JDN_MIN: i64 = HIJRI_EPOCH_JDN;
 
-/// Maximum supported JDN (end of year 1600 AH)
-/// Approximate: 1948439 + 1600*354 + (11*1600)/30 = 2611451
-pub const JDN_MAX: i64 = 2_611_451;
+/// Maximum supported JDN: 30 Dhu al-Hijjah 1600 AH (last day of year 1600).
+/// = `HIJRI_EPOCH_JDN + 354*1599 + floor((3+11*1600)/30) + 325 + 29` = 2515425
+pub const JDN_MAX: i64 = 2_515_425;
 
 // ============================================================================
 // MONTH DATA
@@ -95,51 +95,35 @@ pub const MONTH_NAMES: [&str; 12] = [
 
 /// Check if a Hijri year is a leap year
 ///
-/// In the 30-year cycle, leap years occur at positions: 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29
-/// This adds 11 leap days every 30 years, making the average year 354.36667 days.
+/// Uses the canonical D-R leap year rule: `(14 + 11*year) mod 30 < 11`.
+/// This places leap years at positions 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29 in each
+/// 30-year cycle, adding 11 leap days every 30 years (average year = 354.36667 days).
 ///
 /// # Arguments
 /// * `year` - Hijri year (1–1600)
 ///
 /// # Returns
 /// `true` if the year is a leap year (has 355 days), `false` otherwise
+///
+/// # Sources
+/// - Dershowitz & Reingold (2018), Ch. 6, Eq. 6.7 (`islamic-leap-year?`)
 #[must_use]
 pub const fn is_leap_year(year: u32) -> bool {
-    let year_in_cycle = ((year - 1) % 30) + 1;
-    matches!(
-        year_in_cycle,
-        2 | 5 | 7 | 10 | 13 | 16 | 18 | 21 | 24 | 26 | 29
-    )
+    (14 + 11 * year as u64) % 30 < 11
 }
 
 /// Count leap years from year 1 up to (but not including) the given year
 ///
-/// In a 30-year cycle with leap years at positions 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29,
-/// this function counts how many leap years have occurred from year 1 through year (year-1).
+/// Returns the number of leap years in years 1 through (year - 1), inclusive.
+/// Uses the closed-form D-R expression `floor((3 + 11*Y) / 30)`, which is equivalent
+/// to enumerating positions 2, 5, 7, 10, 13, 16, 18, 21, 24, 26, 29 in each 30-year cycle.
 ///
-/// The formula uses complete 30-year cycles plus a partial cycle calculation.
+/// # Sources
+/// - Dershowitz & Reingold (2018), Ch. 6, Eq. 6.8 (`fixed-from-islamic`, leap correction)
 #[must_use]
 pub const fn count_leap_years_before(year: u32) -> u32 {
-    if year <= 1 {
-        return 0;
-    }
-
-    let year_offset = year - 1; // Years 1 to (year-1) = year_offset years
-    let complete_cycles = year_offset / 30;
-    let remainder_pos = year_offset % 30;
-
-    // Each complete 30-year cycle has 11 leap years
-    let leap_from_cycles = complete_cycles * 11;
-
-    // Count leap years in the partial cycle (positions 1 to remainder_pos)
-    // Using: floor((11 * (pos + 1) - 1) / 30) = floor((11*pos + 10) / 30)
-    let leap_in_partial = if remainder_pos > 0 {
-        (11 * remainder_pos + 10) / 30
-    } else {
-        0
-    };
-
-    leap_from_cycles + leap_in_partial
+    // For year ≤ HIJRI_YEAR_MAX (1600), 11 * year + 3 ≤ 17603, well within u32.
+    (3 + 11 * year) / 30
 }
 
 // ============================================================================
@@ -222,7 +206,8 @@ pub const fn hijri_to_jdn(year: u32, month: u8, day: u8) -> i64 {
 
 /// Convert Julian Day Number to Hijri date
 ///
-/// Implements the inverse tabular algorithm corresponding to `hijri_to_jdn`.
+/// Implements the inverse tabular algorithm from Dershowitz & Reingold, Ch. 6,
+/// Eq. 6.9 (`islamic-from-fixed`). Closed-form, no iteration required.
 ///
 /// # Arguments
 /// * `jdn` - Julian Day Number
@@ -231,16 +216,18 @@ pub const fn hijri_to_jdn(year: u32, month: u8, day: u8) -> i64 {
 /// Result containing (year, month, day) tuple, or error if JDN is out of range
 ///
 /// # Algorithm
-/// 1. Calculate days since epoch
-/// 2. Estimate year using average year length (354.36667 days)
-/// 3. Fine-tune year by iterating through leap year adjustments
-/// 4. Calculate month and day from remaining days
+/// ```text
+/// Y = floor((30 * (jdn - epoch) + 10646) / 10631)
+/// prior_days = jdn - hijri_to_jdn(Y, 1, 1)
+/// M = floor((11 * prior_days + 330) / 325)
+/// D = 1 + jdn - hijri_to_jdn(Y, M, 1)
+/// ```
 ///
 /// # Errors
 /// Returns `CalendarError::OutOfRange` if JDN is outside supported range
 ///
 /// # Sources
-/// - Dershowitz & Reingold (2018), Ch. 6, Eq. 6.3
+/// - Dershowitz & Reingold (2018), Ch. 6, Eq. 6.9
 pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
     if !(JDN_MIN..=JDN_MAX).contains(&jdn) {
         let msg = {
@@ -256,77 +243,26 @@ pub fn jdn_to_hijri(jdn: i64) -> Result<(u32, u8, u8), CalendarError> {
         return Err(CalendarError::OutOfRange(msg));
     }
 
-    // Calculate days since the epoch
-    // Day 0 = epoch day (1 Muharram 1 AH)
-    let mut days_remaining = jdn - HIJRI_EPOCH_JDN;
+    // D-R closed-form year estimation
+    let year_i64 = (30 * (jdn - HIJRI_EPOCH_JDN) + 10646) / 10631;
+    let year = u32::try_from(year_i64).map_err(|_| {
+        CalendarError::ArithmeticError("Computed year does not fit in u32".to_string())
+    })?;
 
-    // Find the Hijri year by iterating from year 1
-    let mut year = HIJRI_YEAR_MIN;
+    // Days elapsed from start of this Hijri year
+    let prior_days = jdn - hijri_to_jdn(year, 1, 1);
 
-    loop {
-        let year_length = i64::from(days_in_year(year));
+    // D-R closed-form month estimation
+    let month_i64 = (11 * prior_days + 330) / 325;
+    let month = u8::try_from(month_i64).map_err(|_| {
+        CalendarError::ArithmeticError("Computed month does not fit in u8".to_string())
+    })?;
 
-        if days_remaining < year_length {
-            // We've found the correct year
-            break;
-        }
-
-        days_remaining -= year_length;
-        year += 1;
-
-        if year > HIJRI_YEAR_MAX {
-            let msg = {
-                #[cfg(feature = "std")]
-                {
-                    "Calculated year exceeds maximum supported year".to_string()
-                }
-                #[cfg(not(feature = "std"))]
-                {
-                    "Year exceeds maximum".to_string()
-                }
-            };
-            return Err(CalendarError::OutOfRange(msg));
-        }
-    }
-
-    // Find the month
-    let mut month = 1u8;
-    loop {
-        let month_length = i64::from(days_in_month(month, year));
-
-        if days_remaining < month_length {
-            // We've found the correct month
-            break;
-        }
-
-        days_remaining -= month_length;
-        month += 1;
-
-        if month > 12 {
-            // Shouldn't happen with valid input
-            return Err(CalendarError::InvalidParameters(
-                "Month calculation failed".to_string(),
-            ));
-        }
-    }
-
-    // The remaining days + 1 = day of month
-    let Some(day) = u8::try_from(days_remaining + 1)
-        .ok()
-        .filter(|&d| (1..=30).contains(&d))
-    else {
-        let msg = {
-            #[cfg(feature = "std")]
-            {
-                format!("Invalid day: {}", days_remaining + 1)
-            }
-            #[cfg(not(feature = "std"))]
-            {
-                "Invalid day".to_string()
-            }
-        };
-        return Err(CalendarError::InvalidParameters(msg));
-    };
+    // Day within the month
+    let day_i64 = 1 + jdn - hijri_to_jdn(year, month, 1);
+    let day = u8::try_from(day_i64).map_err(|_| {
+        CalendarError::ArithmeticError("Computed day does not fit in u8".to_string())
+    })?;
 
     Ok((year, month, day))
 }
@@ -506,46 +442,50 @@ mod tests {
 
     #[test]
     fn test_hijri_anchor_1043() {
-        // 1 Muharram 1043 AH = JDN 2317690 (1 July 1633 CE, Sultan Agung epoch)
-        // This is a critical anchor point that syncs with the Javanese calendar
+        // 1 Muharram 1043 AH = JDN 2317689 (July 7, 1633 CE Gregorian)
+        // D-R astronomical tabular variant (Thursday epoch).
+        // Sultan Agung reform anchor: civil variant is 1 day later (JDN 2317690).
         let hijri = HijriDate {
             year: 1043,
             month: 1,
             day: 1,
         };
         let jdn = hijri.to_jdn();
-        assert_eq!(jdn, 2_317_690, "1 Muharram 1043 AH should be JDN 2317690");
+        assert_eq!(jdn, 2_317_689, "1 Muharram 1043 AH should be JDN 2317689");
 
         // Verify reverse conversion
-        let from_jdn = HijriDate::from_jdn(2_317_690).unwrap();
+        let from_jdn = HijriDate::from_jdn(2_317_689).unwrap();
         assert_eq!(from_jdn, hijri);
     }
 
     #[test]
     fn test_hijri_anchor_1355() {
-        // 1 Muharram 1355 AH = JDN 2428252
+        // 1 Muharram 1355 AH = JDN 2428251 (March 23, 1936 CE Gregorian)
+        // D-R astronomical tabular variant.
         let hijri = HijriDate {
             year: 1355,
             month: 1,
             day: 1,
         };
-        assert_eq!(hijri.to_jdn(), 2_428_252);
+        assert_eq!(hijri.to_jdn(), 2_428_251);
 
-        let from_jdn = HijriDate::from_jdn(2_428_252).unwrap();
+        let from_jdn = HijriDate::from_jdn(2_428_251).unwrap();
         assert_eq!(from_jdn, hijri);
     }
 
     #[test]
     fn test_hijri_anchor_1446() {
-        // 1 Muharram 1446 AH = JDN 2460494 (July 7, 2024 CE)
+        // 1 Muharram 1446 AH = JDN 2460499 (July 7, 2024 CE Gregorian)
+        // D-R astronomical tabular variant. Matches Saudi Umm al-Qura announcement
+        // of 1 Muharram 1446 AH = July 7, 2024.
         let hijri = HijriDate {
             year: 1446,
             month: 1,
             day: 1,
         };
-        assert_eq!(hijri.to_jdn(), 2_460_494);
+        assert_eq!(hijri.to_jdn(), 2_460_499);
 
-        let from_jdn = HijriDate::from_jdn(2_460_494).unwrap();
+        let from_jdn = HijriDate::from_jdn(2_460_499).unwrap();
         assert_eq!(from_jdn, hijri);
     }
 

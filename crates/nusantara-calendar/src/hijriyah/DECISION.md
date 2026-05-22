@@ -54,17 +54,29 @@ The project is licensed **MIT OR Apache-2.0** (dual permissive). Adding a GPL-3.
 
 ### Verification Anchor Points
 
-Key historical dates to verify algorithm correctness:
+Key historical dates verifying the D-R astronomical tabular variant (Thursday epoch):
 
-1. **1 Muharram 1 AH:** JDN 1948439 (July 16, 622 CE) — Islamic epoch, Thursday
-2. **1043 AH:** JDN 2317690 (July 8, 1633 CE) — Sultan Agung epoch (Javanese calendar reference)
-3. **1355 AH:** JDN 2428252 (November 14, 1936 CE) — historical verification
-4. **1446 AH:** JDN 2460494 (July 7, 2025 CE) — modern reference (Eid al-Adha season)
+1. **1 Muharram 1 AH:** JDN 1948439 (Thursday, July 15, 622 CE Julian) — Islamic epoch
+2. **1 Muharram 1043 AH:** JDN 2317689 (July 7, 1633 CE Gregorian) — near Sultan Agung
+   reform (civil variant places this 1 day later at JDN 2317690 = July 8, 1633)
+3. **1 Muharram 1355 AH:** JDN 2428251 (March 23, 1936 CE Gregorian)
+4. **1 Muharram 1446 AH:** JDN 2460499 (July 7, 2024 CE Gregorian) — matches Saudi
+   Umm al-Qura announcement
 
-All four dates must round-trip through:
+All four dates round-trip through:
 ```
 gregorian ←→ jdn ←→ hijri
 ```
+
+### Variant Note
+
+Two common Islamic tabular variants differ by 1 day:
+
+- **Astronomical** (Thursday epoch, JDN 1948439): used here; matches D-R `fixed(227015)`
+- **Civil** (Friday epoch, JDN 1948440): used in some historical records (e.g., the
+  Sultan Agung Javanese reform records 1 Muharram 1043 AH as July 8, 1633 = JDN 2317690)
+
+Both share the same leap year rule and month lengths; only the epoch differs by 1 day.
 
 ### Related Decisions
 
