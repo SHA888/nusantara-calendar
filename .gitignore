@@ -55,3 +55,14 @@ Cargo.lock
 .rustup/
 .cargo/registry
 .cargo/git
+
+# Agents and memory
+.claude/
+CLAUDE.md
+agents/
+.skill/
+.cursor/rules/skill-context.md
+.windsurf/rules/skill-context.md
+.claude/commands/
+Plans.md
+out/
